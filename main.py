@@ -3,15 +3,16 @@ import player as pl
 import fight
 import NPC as npc
 
-SCREEN_WIDTH = 992
-SCREEN_HEIGHT = 572
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
 SCREEN_TITLE = "THE GAME"
 CAMERA_SPEED = 0.05  # szybokość z jaką kamera nadąża za graczem od 0 do 1
 
 
 class GameWindow(arcade.Window):
     def __init__(self, width, height, title, player_object):
-        super().__init__(width, height, title)
+        super().__init__(width, height, title, fullscreen=True)
+        self.set_vsync(True)
         self.playerObject = player_object
 
     def on_key_press(self, key, key_modifiers):
@@ -31,7 +32,7 @@ class GameView(arcade.View):
 
         self.playerObject = player_object
 
-        self.tile_map = None
+        self.background = None
         self.scene = None
 
         self.physics_engine = None
@@ -42,20 +43,17 @@ class GameView(arcade.View):
         self.inventoryView = None
 
     def setup(self):
+        self.background = arcade.load_texture("sprites/bg.png")
+
         self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.gui_camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-        self.tile_map = arcade.load_tilemap("Maps/village/village.json", 2)
-        self.scene = arcade.Scene.from_tilemap(self.tile_map)
-        if self.tile_map.background_color:
-            arcade.set_background_color(self.tile_map.background_color)
-
+        self.scene = arcade.Scene()
         self.scene.add_sprite_list("Player")
         self.scene.add_sprite_list("Slash")
         self.scene.add_sprite("Player", self.playerObject)
 
         self.scene.add_sprite_list("NPC")
-        self.scene.add_sprite("NPC", npc.NPC("sprites/player/player_start.png", "WRUG", "Straszny Frug", 735, 835, health=150))
 
         # Utworzenie silnkia fizyki nakładającego kolizje na Walls
         self.physics_engine = arcade.PymunkPhysicsEngine(damping=0)
@@ -64,9 +62,9 @@ class GameView(arcade.View):
                                        collision_type="player",
                                        max_horizontal_velocity=1000000,
                                        max_vertical_velocity=1000000)
-        self.physics_engine.add_sprite_list(self.scene.get_sprite_list("collision"),
-                                            collision_type="wall",
-                                            body_type=arcade.PymunkPhysicsEngine.STATIC)
+        # self.physics_engine.add_sprite_list(self.scene.get_sprite_list("collision"),
+        #                                     collision_type="wall",
+        #                                     body_type=arcade.PymunkPhysicsEngine.STATIC)
         self.physics_engine.add_sprite_list(self.scene.get_sprite_list("NPC"),
                                             collision_type="NPC",
                                             moment_of_intertia=1000000)
@@ -76,9 +74,11 @@ class GameView(arcade.View):
         Render the screen.
         """
         self.clear()
-
+        arcade.draw_lrwh_rectangle_textured(0, 0,
+                                            SCREEN_WIDTH, SCREEN_HEIGHT,
+                                            self.background)
         self.scene.draw(pixelated=True)
-        self.scene.draw_hit_boxes((255, 0, 0), 1, ["Player", "collision", "Slash", "NPC"])
+        # self.scene.draw_hit_boxes((255, 0, 0), 1, ["Player", "Slash", "NPC"])
         self.scene.get_sprite_list("Slash").visible = False
 
         self.camera.use()
@@ -135,7 +135,7 @@ class GameView(arcade.View):
 
 
 def main():
-    player_object = pl.Player("sprites/player/player_start.png", 735, 865)
+    player_object = pl.Player("sprites/player/player_idle_1.png", 1000, 500)
     window = GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, player_object)
     start_view = GameView(player_object)
     window.show_view(start_view)

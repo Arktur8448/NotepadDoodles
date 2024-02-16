@@ -7,7 +7,7 @@ DELTA_TIME = 1/60
 
 class Player(arcade.Sprite):
     def __init__(self, sprite_path, x, y):
-        super().__init__(filename=sprite_path, center_x=x, center_y=y, scale=1.6)
+        super().__init__(filename=sprite_path, center_x=x, center_y=y, scale=0.8)
         self.movement_speed = 5000
         self.sprint_speed = 10000
         self.max_sprint_speed = 3600
@@ -33,26 +33,20 @@ class Player(arcade.Sprite):
 
         self.cur_texture = 1
         self.time_counter = 0
-        self.animation_time_interval = 1
-        self.move_animation_time_interval = 0.3
-        self.sprint_animation_time_interval = 0.2
-        self.animation_count = 2
-        self.idle_up = arcade.load_texture("sprites/player/Idle_Up.png")
-        self.idle_down = arcade.load_texture("sprites/player/Idle_Down.png")
-        self.idle_left = arcade.load_texture("sprites/player/Idle_Left.png")
-        self.idle_right = arcade.load_texture("sprites/player/Idle_Right.png")
-        self.move_up = []
-        for i in range(1, self.animation_count + 1):
-            self.move_up.append(arcade.load_texture(f"sprites/player/Walk_Up_{i}.png"))
-        self.move_down = []
-        for i in range(1, self.animation_count + 1):
-            self.move_down.append(arcade.load_texture(f"sprites/player/Walk_Down_{i}.png"))
-        self.move_left = []
-        for i in range(1, self.animation_count + 1):
-            self.move_left.append(arcade.load_texture(f"sprites/player/Walk_Left_{i}.png"))
-        self.move_right = []
-        for i in range(1, self.animation_count + 1):
-            self.move_right.append(arcade.load_texture(f"sprites/player/Walk_Right_{i}.png"))
+
+        self.idle = []
+        for i in range(1, 3):
+            self.idle.append(arcade.load_texture(f"sprites/player/player_idle_{i}.png"))
+        self.idle_animation_count = len(self.idle)
+        self.idle_time_interval = 1
+
+        self.move = []
+        for i in range(1, 5):
+            self.move.append(arcade.load_texture(f"sprites/player/player_walk_{i}.png"))
+        self.move_animation_count = len(self.move)
+        self.move_time_interval = 0
+        self.sprint_time_interval = 0.3
+        self.walk_time_interval = 0.5
 
         self.health = 25
         self.max_health = 30
@@ -78,9 +72,9 @@ class Player(arcade.Sprite):
             else:
                 self.moving = False
             if arcade.key.LSHIFT in self.keys and self.stamina > 0:
+                self.move_time_interval = self.sprint_time_interval
                 self.can_regen_stamina = False
                 speed = self.sprint_speed
-                self.animation_time_interval = self.sprint_animation_time_interval
                 if arcade.key.W in self.keys or arcade.key.A in self.keys or arcade.key.S in self.keys or arcade.key.D in self.keys:
                     self.stamina -= 1/10
                     if self.stamina < 1:
@@ -88,7 +82,7 @@ class Player(arcade.Sprite):
             else:
                 speed = self.movement_speed
                 self.can_regen_stamina = True
-                self.animation_time_interval = self.move_animation_time_interval
+                self.move_time_interval = self.walk_time_interval
 
             if arcade.key.W in self.keys:
                 physics_engine.apply_force(self, (0, speed))
@@ -194,66 +188,22 @@ class Player(arcade.Sprite):
             physics_engine.apply_force(self, self.dash_force)
 
     def update_animation(self, delta_time: float = 1 / 60):
-        self.time_counter += delta_time
         if self.ifAttack:
             self.cur_texture = 0
-            match self.direction_attack:
-                case "Down":
-                    self.texture = self.move_down[0]
-                case "Up":
-                    self.texture = self.move_up[0]
-                case "Left":
-                    self.texture = self.move_left[0]
-                case "Right":
-                    self.texture = self.move_right[0]
-                case "UpLeft":
-                    self.texture = self.move_up[0]
-                case "UpRight":
-                    self.texture = self.move_up[1]
-                case "DownLeft":
-                    self.texture = self.move_down[0]
-                case "DownRight":
-                    self.texture = self.move_down[1]
             self.direction_move = self.direction_attack
         elif self.moving:
-            if self.time_counter >= self.animation_time_interval:
+            self.time_counter += delta_time
+            if self.time_counter >= self.move_time_interval:
                 self.cur_texture += 1
                 self.time_counter = 0
-            if self.cur_texture > self.animation_count - 1:
+            if self.cur_texture > self.move_animation_count - 1:
                 self.cur_texture = 0
-            match self.direction_move:
-                case "Down":
-                    self.texture = self.move_down[self.cur_texture]
-                case "Up":
-                    self.texture = self.move_up[self.cur_texture]
-                case "Left":
-                    self.texture = self.move_left[self.cur_texture]
-                case "Right":
-                    self.texture = self.move_right[self.cur_texture]
-                case "UpLeft":
-                    self.texture = self.move_up[self.cur_texture]
-                case "UpRight":
-                    self.texture = self.move_up[self.cur_texture]
-                case "DownLeft":
-                    self.texture = self.move_down[self.cur_texture]
-                case "DownRight":
-                    self.texture = self.move_down[self.cur_texture]
+            self.texture = self.move[self.cur_texture]
         else:
-            self.cur_texture = 0
-            match self.direction_move:
-                case "Down":
-                    self.texture = self.idle_down
-                case "Up":
-                    self.texture = self.idle_up
-                case "Left":
-                    self.texture = self.idle_left
-                case "Right":
-                    self.texture = self.idle_right
-                case "UpLeft":
-                    self.texture = self.idle_up
-                case "UpRight":
-                    self.texture = self.idle_up
-                case "DownLeft":
-                    self.texture = self.idle_down
-                case "DownRight":
-                    self.texture = self.idle_down
+            self.time_counter += delta_time
+            if self.time_counter >= self.idle_time_interval:
+                self.cur_texture += 1
+                self.time_counter = 0
+            if self.cur_texture > self.idle_animation_count - 1:
+                self.cur_texture = 0
+            self.texture = self.idle[self.cur_texture]
