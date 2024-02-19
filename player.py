@@ -2,7 +2,7 @@ import arcade
 import time
 from pyglet.math import Vec2
 
-DELTA_TIME = 1/60
+DELTA_TIME = 1 / 60
 
 
 class Player(arcade.Sprite):
@@ -11,9 +11,9 @@ class Player(arcade.Sprite):
         self.movement_speed = 5000
         self.sprint_speed = 10000
         self.max_sprint_speed = 3600
-        
-        self.dash_distance = 2000
-        self.dash_cooldown = 0.1
+
+        self.dash_distance = 3000
+        self.dash_cooldown = 1
         self.dash_force = [0, 0]
         self.default_dash_duration = 0.3
         self.dash_duration = 0
@@ -52,12 +52,8 @@ class Player(arcade.Sprite):
         self.max_health = 30
         self.can_regen_health = True
 
-        self.mana = 10
-        self.max_mana = 30
-        self.can_regen_mana = True
-
-        self.stamina = 300
-        self.max_stamina = 300
+        self.stamina = 20
+        self.max_stamina = 20
         self.can_regen_stamina = True
 
         self.strength = 10
@@ -66,6 +62,7 @@ class Player(arcade.Sprite):
 
     def movement(self, camera, camer_speed, width, height, physics_engine):
         """Pełny Ruch Gracza"""
+
         def check_move_key():  # aktualizacja pozycji w zależności od naciśniętych klawiszy
             if arcade.key.W in self.keys or arcade.key.A in self.keys or arcade.key.S in self.keys or arcade.key.D in self.keys:
                 self.moving = True
@@ -76,7 +73,7 @@ class Player(arcade.Sprite):
                 self.can_regen_stamina = False
                 speed = self.sprint_speed
                 if arcade.key.W in self.keys or arcade.key.A in self.keys or arcade.key.S in self.keys or arcade.key.D in self.keys:
-                    self.stamina -= 1/10
+                    self.stamina -= 1 / 10
                     if self.stamina < 1:
                         self.stamina = -5  # jeśli zbyt mocno zużyjesz staminę to musisz bardziej odpocząć, przez chwilę ciężej ci złapać oddech
             else:
@@ -157,8 +154,6 @@ class Player(arcade.Sprite):
     def update_player(self, physics_engine):
         if self.can_regen_health:
             self.health += DELTA_TIME / 5
-        if self.can_regen_mana:
-            self.mana += DELTA_TIME * 1
         if self.can_regen_stamina:
             if self.stamina < self.max_stamina / 2:
                 self.stamina += DELTA_TIME * 3.5  # wolniejsze ładowanie staminy jeśli zużjesz ją w więcej niz w połowie
@@ -167,8 +162,6 @@ class Player(arcade.Sprite):
 
         if self.health > self.max_health:
             self.health = self.max_health
-        if self.mana > self.max_mana:
-            self.mana = self.max_mana
         if self.stamina > self.max_stamina:
             self.stamina = self.max_stamina
 
@@ -207,3 +200,33 @@ class Player(arcade.Sprite):
             if self.cur_texture > self.idle_animation_count - 1:
                 self.cur_texture = 0
             self.texture = self.idle[self.cur_texture]
+
+    def show_stamina(self):
+        stamina = arcade.Text(
+            f"{int(self.stamina)}/{self.max_stamina}⚡",
+            self.center_x,
+            self.center_y + 60,
+            arcade.color.GREEN,
+            20,
+            font_name="Kenney Blocks",
+            anchor_x="center"
+        )
+        if self.stamina != self.max_stamina:
+            return stamina
+        else:
+            return None
+
+    def show_hp(self):
+        hp = arcade.Text(
+            f"{int(self.health)}/{self.max_health}",
+            self.center_x,
+            self.center_y - 80,
+            arcade.color.RED,
+            20,
+            font_name="Kenney Blocks",
+            anchor_x="center"
+        )
+        if self.health != self.max_health:
+            return hp
+        else:
+            return None

@@ -85,38 +85,17 @@ class GameView(arcade.View):
             bar = n.show_health()
             bar.draw()
 
-        self.draw_gui()
+        # self.draw_gui()
+        stamina = self.playerObject.show_stamina()
+        if stamina is not None:
+            stamina.draw()
+        hp = self.playerObject.show_hp()
+        if hp is not None:
+            hp.draw()
 
     def draw_gui(self):
         self.gui_camera.use()
-        hp = arcade.Text(
-            f"HP: {int(self.playerObject.health)}/{self.playerObject.max_health}",
-            10,
-            SCREEN_HEIGHT - 30,
-            arcade.color.BLACK,
-            20,
-            font_name="Kenney Blocks",
-        )
-        mana = arcade.Text(
-            f"MANA: {int(self.playerObject.mana)}/{self.playerObject.max_mana}",
-            10,
-            SCREEN_HEIGHT - 60,
-            arcade.color.BLACK,
-            20,
-            font_name="Kenney Blocks",
-        )
-        stamina = arcade.Text(
-            f"STAMINA: {int(self.playerObject.stamina)}/{self.playerObject.max_stamina}",
-            10,
-            SCREEN_HEIGHT - 90,
-            arcade.color.BLACK,
-            20,
-            font_name="Kenney Blocks",
-        )
-        arcade.draw_rectangle_filled(150, SCREEN_HEIGHT - 50, 300, 100, (205, 127, 50))
-        hp.draw()
-        mana.draw()
-        stamina.draw()
+
         self.camera.use()
 
     def on_update(self, delta_time):

@@ -15,9 +15,8 @@ class Slash(arcade.Sprite):
         self.direction = None
 
 
-def get_slash(player_object, scene, x, y, slash_damage, slash_stamina, slash_cooldown, slash_duration):
-    if len(scene.get_sprite_list("Slash")) == 0 and player_object.stamina > slash_stamina and player_object.slash_cooldown_time <= 0:
-        player_object.stamina -= slash_stamina
+def get_slash(player_object, scene, x, y, slash_damage, slash_cooldown, slash_duration):
+    if len(scene.get_sprite_list("Slash")) == 0 and player_object.slash_cooldown_time <= 0:
         slash = Slash(center_x=player_object.center_x, center_y=player_object.center_y)
         x -= SCREEN_WIDTH / 2
         y -= SCREEN_HEIGHT / 2

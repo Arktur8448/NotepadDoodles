@@ -1,5 +1,6 @@
 import arcade
 
+
 class NPC (arcade.Sprite):
     def __init__(self, filename, name, description, pos_x, pos_y, level=1, exp_drop=0, health=1, strength=1, defence=1, agility=1,speed=1, race=None,
                  weapon=None, drop=None, to_sell=None):
