@@ -1,6 +1,7 @@
 import arcade
 import time
 from pyglet.math import Vec2
+import gui
 
 DELTA_TIME = 1 / 60
 
@@ -48,9 +49,9 @@ class Player(arcade.Sprite):
         self.sprint_time_interval = 0.3
         self.walk_time_interval = 0.5
 
-        self.health = 25
-        self.max_health = 30
-        self.can_regen_health = True
+        self.hp = 25
+        self.max_hp = 30
+        self.can_regen_hp = True
 
         self.stamina = 20
         self.max_stamina = 20
@@ -152,16 +153,16 @@ class Player(arcade.Sprite):
             move_camera_to_player()
 
     def update_player(self, physics_engine):
-        if self.can_regen_health:
-            self.health += DELTA_TIME / 5
+        if self.can_regen_hp:
+            self.hp += DELTA_TIME / 2
         if self.can_regen_stamina:
             if self.stamina < self.max_stamina / 2:
                 self.stamina += DELTA_TIME * 3.5  # wolniejsze ładowanie staminy jeśli zużjesz ją w więcej niz w połowie
             elif self.stamina < self.max_stamina:
                 self.stamina += DELTA_TIME * 3
 
-        if self.health > self.max_health:
-            self.health = self.max_health
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp
         if self.stamina > self.max_stamina:
             self.stamina = self.max_stamina
 
@@ -202,31 +203,23 @@ class Player(arcade.Sprite):
             self.texture = self.idle[self.cur_texture]
 
     def show_stamina(self):
-        stamina = arcade.Text(
-            f"{int(self.stamina)}/{self.max_stamina}⚡",
-            self.center_x,
-            self.center_y + 60,
-            arcade.color.GREEN,
-            20,
-            font_name="Kenney Blocks",
-            anchor_x="center"
-        )
         if self.stamina != self.max_stamina:
-            return stamina
-        else:
-            return None
+            stamina_bar = gui.IndicatorBar(self.center_x, self.center_y + 70,
+                                           "sprites/gui/bars/bar_full.png", "sprites/gui/bars/Bar.png", 80, 14, 2)
+            stamina_bar.fullness = self.stamina / self.max_stamina
+            stamina_bar.draw()
+            piorun = arcade.Sprite("sprites/gui/bars/Piorun.png", scale=0.5)
+            piorun.center_x = self.center_x - 42
+            piorun.center_y = self.center_y + 70
+            piorun.draw()
 
     def show_hp(self):
-        hp = arcade.Text(
-            f"{int(self.health)}/{self.max_health}",
-            self.center_x,
-            self.center_y - 80,
-            arcade.color.RED,
-            20,
-            font_name="Kenney Blocks",
-            anchor_x="center"
-        )
-        if self.health != self.max_health:
-            return hp
-        else:
-            return None
+        if self.hp != self.max_hp:
+            hp_bar = gui.IndicatorBar(self.center_x, self.center_y - 70,
+                                      "sprites/gui/bars/bar_full.png", "sprites/gui/bars/Bar.png", 100, 16, 2)
+            hp_bar.fullness = self.hp / self.max_hp
+            hp_bar.draw()
+            heart = arcade.Sprite("sprites/gui/bars/Heart.png", scale=0.5)
+            heart.center_x = self.center_x - 50
+            heart.center_y = self.center_y - 65
+            heart.draw()

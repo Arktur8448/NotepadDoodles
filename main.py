@@ -1,7 +1,10 @@
+import random
+
 import arcade
 import player as pl
 import fight
 import NPC as npc
+import gui
 
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
@@ -86,16 +89,11 @@ class GameView(arcade.View):
             bar.draw()
 
         # self.draw_gui()
-        stamina = self.playerObject.show_stamina()
-        if stamina is not None:
-            stamina.draw()
-        hp = self.playerObject.show_hp()
-        if hp is not None:
-            hp.draw()
+        self.playerObject.show_stamina()
+        self.playerObject.show_hp()
 
     def draw_gui(self):
         self.gui_camera.use()
-
         self.camera.use()
 
     def on_update(self, delta_time):
@@ -105,10 +103,12 @@ class GameView(arcade.View):
         fight.update(self.playerObject, self.physics_engine, self.scene)
 
         self.scene.update_animation(delta_time, ["Player"])
+        if arcade.key.K in self.playerObject.keys:
+            self.playerObject.hp = random.randint(1, self.playerObject.max_hp)
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if button == 1:
-            fight.get_slash(self.playerObject, self.scene, x, y, self.playerObject.strength, 10, 0.2, 0.2)
+            fight.get_slash(self.playerObject, self.scene, x, y, self.playerObject.strength, 10, 0.2)
 
 
 def main():
