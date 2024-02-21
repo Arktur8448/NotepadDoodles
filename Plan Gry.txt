@@ -1,0 +1,22 @@
+Artur Mergalski
+Tytuł: 
+Notepad Survivor 
+Silnik: 
+Arcade Python
+Opis:
+Będzie to gra oparta na pomyśle podobnym do Vampire Survivor. Będzie ona polegała na przetwaniu turowych fali potwórów, ulepszaniu się oraz pokonywaniu bossów
+Przebieg Gry:
+1.Wybranie klasy postaci, Każda ma osobne wady i zalety
+2.Próba przetrwania na arenie pełnej potworów
+3.Zbieranie waluty i przedmiotów z potworów 
+4.Przerwa na kupno artefaktów i uleprzenie postaci
+5.Kilka razy powtórzenie cyklu walka-ulepszenie
+6.Walka z bossem 
+7.Po przetrwaniu np. 20 tur następuje wygrana i odblokowanie nowego poziomu trudności
+Mechaniki:
+1.Walka
+Na razie planuje walke wręcz i dystansową w postaci broni oraz czarów. Bedzię też możliwość robienia uników
+2.Turowa walka
+Na początków każdej tury następuje pojawienie się potworów. Gracz musi je pokonać i zerbrać z nich walute i przedmioty. Po turze gracz trafia do sklepu w którym może kupić artefakty i bronie. Artefakty będą wchodzić w synergię z klasami postaci i brońmi.
+3.Klasy postaci
+Każda klasa ma swoje własne plusy i minusy. Np Mag może mieć ulepszenie do zaklęc ale nie może walczyć wręcz. Cztero ręki człowiek może mięc 4 bronie ale ma gorszą celność. 
