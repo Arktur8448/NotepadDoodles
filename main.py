@@ -74,9 +74,6 @@ class GameView(arcade.View):
                                             moment_of_intertia=1000000)
 
     def on_draw(self):
-        """
-        Render the screen.
-        """
         self.clear()
         self.scene.draw(pixelated=True)
         # self.scene.draw_hit_boxes((255, 0, 0), 1, ["Player", "collision"])

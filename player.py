@@ -2,6 +2,7 @@ import arcade
 import time
 from pyglet.math import Vec2
 import gui
+import characters
 
 DELTA_TIME = 1 / 60
 
@@ -49,17 +50,22 @@ class Player(arcade.Sprite):
         self.sprint_time_interval = 0.3
         self.walk_time_interval = 0.5
 
-        self.hp = 25
-        self.max_hp = 30
+        self.hp = 99999999
+        self.max_hp = 50
         self.can_regen_hp = True
+        self.hp_regen_rate = 1
 
-        self.stamina = 20
+        self.stamina = 9999999999
         self.max_stamina = 20
         self.can_regen_stamina = True
+        self.stamina_regen_rate = 2
 
         self.strength = 10
         self.defence = 10
         self.agility = 10
+
+        self.character = characters.Golem()
+        self.setup_chracter()
 
     def movement(self, camera, camer_speed, width, height, physics_engine):
         """Pełny Ruch Gracza"""
@@ -154,12 +160,12 @@ class Player(arcade.Sprite):
 
     def update_player(self, physics_engine):
         if self.can_regen_hp:
-            self.hp += DELTA_TIME / 2
+            self.hp += DELTA_TIME * self.hp_regen_rate
         if self.can_regen_stamina:
             if self.stamina < self.max_stamina / 2:
-                self.stamina += DELTA_TIME * 3.5  # wolniejsze ładowanie staminy jeśli zużjesz ją w więcej niz w połowie
+                self.stamina += DELTA_TIME * (self.stamina_regen_rate * 0.75)  # wolniejsze ładowanie staminy jeśli zużjesz ją w więcej niz w połowie
             elif self.stamina < self.max_stamina:
-                self.stamina += DELTA_TIME * 3
+                self.stamina += DELTA_TIME * self.stamina_regen_rate
 
         if self.hp > self.max_hp:
             self.hp = self.max_hp
@@ -203,7 +209,7 @@ class Player(arcade.Sprite):
             self.texture = self.idle[self.cur_texture]
 
     def show_stamina(self):
-        if self.stamina != self.max_stamina:
+        if self.stamina != self.max_stamina and not self.max_stamina == 0:
             stamina_bar = gui.IndicatorBar(self.center_x, self.center_y + 70,
                                            "sprites/gui/bars/bar_full.png", "sprites/gui/bars/Bar.png", 80, 14, 2)
             stamina_bar.fullness = self.stamina / self.max_stamina
@@ -212,6 +218,16 @@ class Player(arcade.Sprite):
             piorun.center_x = self.center_x - 42
             piorun.center_y = self.center_y + 70
             piorun.draw()
+            stamina = arcade.Text(
+                f"{int(self.stamina)}/{self.max_stamina}",
+                self.center_x,
+                self.center_y + 65,
+                arcade.color.BLACK,
+                10,
+                anchor_x="center",
+                bold=True
+            )
+            stamina.draw()
 
     def show_hp(self):
         if self.hp != self.max_hp:
@@ -223,3 +239,20 @@ class Player(arcade.Sprite):
             heart.center_x = self.center_x - 50
             heart.center_y = self.center_y - 65
             heart.draw()
+            hp = arcade.Text(
+                f"{int(self.hp)}/{self.max_hp}",
+                self.center_x,
+                self.center_y - 75,
+                arcade.color.BLACK,
+                10,
+                anchor_x="center",
+                bold=True
+            )
+            hp.draw()
+
+    def setup_chracter(self):
+        print(self.character.name)
+        print(self.character.desc)
+        print(self.character.generate_detailed_desc(self))
+        self.character.apply_mulitplayers(self)
+        self.character.chracter_start_skills(self)
