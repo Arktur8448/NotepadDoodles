@@ -109,7 +109,7 @@ class GameView(arcade.View):
 
 
 def main():
-    player_object = pl.Player("sprites/player/player_idle_1.png", 1280*2, 1280*2)
+    player_object = pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2)
     window = GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, player_object)
     start_view = GameView(player_object)
     window.show_view(start_view)

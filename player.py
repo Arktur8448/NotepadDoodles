@@ -10,6 +10,8 @@ DELTA_TIME = 1 / 60
 class Player(arcade.Sprite):
     def __init__(self, sprite_path, x, y):
         super().__init__(filename=sprite_path, center_x=x, center_y=y, scale=0.8)
+        self.character = characters.Wizard()
+
         self.movement_speed = 5000
         self.sprint_multiplayer = 1.25
         self.max_sprint_speed = 3600
@@ -35,23 +37,6 @@ class Player(arcade.Sprite):
         self.ifIdle = True
         self.ifAttack = False
 
-        self.cur_texture = 1
-        self.time_counter = 0
-
-        self.idle = []
-        for i in range(1, 3):
-            self.idle.append(arcade.load_texture(f"sprites/player/player_idle_{i}.png"))
-        self.idle_animation_count = len(self.idle)
-        self.idle_time_interval = 1
-
-        self.move = []
-        for i in range(1, 5):
-            self.move.append(arcade.load_texture(f"sprites/player/player_walk_{i}.png"))
-        self.move_animation_count = len(self.move)
-        self.move_time_interval = 0
-        self.sprint_time_interval = 0.3
-        self.walk_time_interval = 0.5
-
         self.hp = 99999999
         self.max_hp = 100
         self.can_regen_hp = True
@@ -69,11 +54,35 @@ class Player(arcade.Sprite):
         self.dodge = 10  # Dodge the damage
         self.accuracy = 10  # Ranged
 
-        self.character = characters.Ranger()
+        self.cur_texture = 1
+        self.time_counter = 0
+
+        self.idle = []
+        for i in range(1, 3):
+            try:
+                self.idle.append(arcade.load_texture(f"sprites/player/{self.character.name.lower()}/player_idle_{i}.png"))
+            except:
+                self.idle.append(arcade.load_texture(f"sprites/player/stickman/player_idle_{i}.png"))
+
+        self.idle_animation_count = len(self.idle)
+        self.idle_time_interval = 1
+
+        self.move = []
+        for i in range(1, 5):
+            try:
+                self.move.append(arcade.load_texture(f"sprites/player/{self.character.name.lower()}/player_walk_{i}.png"))
+            except:
+                self.move.append(arcade.load_texture(f"sprites/player/stickman/player_walk_{i}.png"))
+        self.move_animation_count = len(self.move)
+        self.move_time_interval = 0
+        self.sprint_time_interval = 0.3
+        self.walk_time_interval = 0.5
+
         self.setup_character()
 
     def movement(self, camera, camera_speed, width, height, physics_engine):
         """Pełny Ruch Gracza"""
+
         def check_move_key():  # aktualizacja pozycji w zależności od naciśniętych klawiszy
             if arcade.key.W in self.keys or arcade.key.A in self.keys or arcade.key.S in self.keys or arcade.key.D in self.keys:
                 self.moving = True
@@ -128,7 +137,8 @@ class Player(arcade.Sprite):
                 self.center_x - width / 2,
                 self.center_y - height / 2
             )
-            if (arcade.key.A in self.keys or arcade.key.D in self.keys) and not (arcade.key.W in self.keys or arcade.key.S in self.keys):
+            if (arcade.key.A in self.keys or arcade.key.D in self.keys) and not (
+                    arcade.key.W in self.keys or arcade.key.S in self.keys):
                 cameraSpeed /= 5
             camera.move_to(position, cameraSpeed)
 
@@ -171,7 +181,8 @@ class Player(arcade.Sprite):
             self.hp += DELTA_TIME * self.hp_regen_rate
         if self.can_regen_stamina:
             if self.stamina < self.max_stamina / 2:
-                self.stamina += DELTA_TIME * (self.stamina_regen_rate * 0.75)  # wolniejsze ładowanie staminy jeśli zużjesz ją w więcej niz w połowie
+                self.stamina += DELTA_TIME * (
+                        self.stamina_regen_rate * 0.75)  # wolniejsze ładowanie staminy jeśli zużjesz ją w więcej niz w połowie
             elif self.stamina < self.max_stamina:
                 self.stamina += DELTA_TIME * self.stamina_regen_rate
 
