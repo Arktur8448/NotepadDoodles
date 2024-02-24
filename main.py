@@ -1,5 +1,4 @@
 import random
-
 import arcade
 import player as pl
 import fight
@@ -33,6 +32,7 @@ class GameView(arcade.View):
     def __init__(self, player_object):
         super().__init__()
 
+        self.camera_speed = None
         self.playerObject = player_object
 
         self.tile_map = None
@@ -114,6 +114,7 @@ def main():
     start_view = GameView(player_object)
     window.show_view(start_view)
     start_view.setup()
+    window.current_view.camera.move_to((player_object.center_x - (SCREEN_WIDTH/2), player_object.center_y-(SCREEN_HEIGHT/2)), 1)
     arcade.run()
 
 

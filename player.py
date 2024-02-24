@@ -11,11 +11,13 @@ class Player(arcade.Sprite):
     def __init__(self, sprite_path, x, y):
         super().__init__(filename=sprite_path, center_x=x, center_y=y, scale=0.8)
         self.movement_speed = 5000
-        self.sprint_speed = 10000
+        self.sprint_multiplayer = 1.25
         self.max_sprint_speed = 3600
 
-        self.dash_distance = 3000
+        self.dash_distance = 2000
         self.dash_cooldown = 1
+        self.dash_stamina_use = 10
+
         self.dash_force = [0, 0]
         self.default_dash_duration = 0.3
         self.dash_duration = 0
@@ -51,25 +53,27 @@ class Player(arcade.Sprite):
         self.walk_time_interval = 0.5
 
         self.hp = 99999999
-        self.max_hp = 50
+        self.max_hp = 100
         self.can_regen_hp = True
         self.hp_regen_rate = 1
 
         self.stamina = 9999999999
-        self.max_stamina = 20
+        self.max_stamina = 10
         self.can_regen_stamina = True
         self.stamina_regen_rate = 2
+        self.stamina_sprint_use = 3  # Per second
 
-        self.strength = 10
-        self.defence = 10
-        self.agility = 10
+        self.strength = 10  # Close range
+        self.defence = 10  # Defence and change to block damage
+        self.agility = 10  # Magic
+        self.dodge = 10  # Dodge the damage
+        self.accuracy = 10  # Ranged
 
-        self.character = characters.Golem()
-        self.setup_chracter()
+        self.character = characters.Ranger()
+        self.setup_character()
 
-    def movement(self, camera, camer_speed, width, height, physics_engine):
+    def movement(self, camera, camera_speed, width, height, physics_engine):
         """Pełny Ruch Gracza"""
-
         def check_move_key():  # aktualizacja pozycji w zależności od naciśniętych klawiszy
             if arcade.key.W in self.keys or arcade.key.A in self.keys or arcade.key.S in self.keys or arcade.key.D in self.keys:
                 self.moving = True
@@ -78,9 +82,9 @@ class Player(arcade.Sprite):
             if arcade.key.LSHIFT in self.keys and self.stamina > 0:
                 self.move_time_interval = self.sprint_time_interval
                 self.can_regen_stamina = False
-                speed = self.sprint_speed
+                speed = self.movement_speed * self.sprint_multiplayer
                 if arcade.key.W in self.keys or arcade.key.A in self.keys or arcade.key.S in self.keys or arcade.key.D in self.keys:
-                    self.stamina -= 1 / 10
+                    self.stamina -= DELTA_TIME * self.stamina_sprint_use
                     if self.stamina < 1:
                         self.stamina = -5  # jeśli zbyt mocno zużyjesz staminę to musisz bardziej odpocząć, przez chwilę ciężej ci złapać oddech
             else:
@@ -115,16 +119,18 @@ class Player(arcade.Sprite):
                     self.direction_move = "Right"
 
             if arcade.key.SPACE in self.keys:
-                if time.perf_counter() - self.dash_last_time > self.dash_cooldown and self.stamina > 10:
-                    self.stamina -= 10
+                if time.perf_counter() - self.dash_last_time > self.dash_cooldown and self.stamina > self.dash_stamina_use:
+                    self.stamina -= self.dash_stamina_use
                     dash()
 
-        def move_camera_to_player():
+        def move_camera_to_player(cameraSpeed):
             position = Vec2(
                 self.center_x - width / 2,
                 self.center_y - height / 2
             )
-            camera.move_to(position, camer_speed)
+            if (arcade.key.A in self.keys or arcade.key.D in self.keys) and not (arcade.key.W in self.keys or arcade.key.S in self.keys):
+                cameraSpeed /= 5
+            camera.move_to(position, cameraSpeed)
 
         def dash():
             self.dash_last_time = time.perf_counter()
@@ -156,9 +162,11 @@ class Player(arcade.Sprite):
 
         if self.can_move:
             check_move_key()
-            move_camera_to_player()
+        if self.moving:
+            move_camera_to_player(camera_speed)
 
     def update_player(self, physics_engine):
+        self.character.character_skills(self)
         if self.can_regen_hp:
             self.hp += DELTA_TIME * self.hp_regen_rate
         if self.can_regen_stamina:
@@ -209,7 +217,7 @@ class Player(arcade.Sprite):
             self.texture = self.idle[self.cur_texture]
 
     def show_stamina(self):
-        if self.stamina != self.max_stamina and not self.max_stamina == 0:
+        if self.stamina != self.max_stamina and not self.max_stamina == 0 and not self.stamina < 0:
             stamina_bar = gui.IndicatorBar(self.center_x, self.center_y + 70,
                                            "sprites/gui/bars/bar_full.png", "sprites/gui/bars/Bar.png", 80, 14, 2)
             stamina_bar.fullness = self.stamina / self.max_stamina
@@ -219,7 +227,7 @@ class Player(arcade.Sprite):
             piorun.center_y = self.center_y + 70
             piorun.draw()
             stamina = arcade.Text(
-                f"{int(self.stamina)}/{self.max_stamina}",
+                f"{int(self.stamina)}/{int(self.max_stamina)}",
                 self.center_x,
                 self.center_y + 65,
                 arcade.color.BLACK,
@@ -240,7 +248,7 @@ class Player(arcade.Sprite):
             heart.center_y = self.center_y - 65
             heart.draw()
             hp = arcade.Text(
-                f"{int(self.hp)}/{self.max_hp}",
+                f"{int(self.hp)}/{int(self.max_hp)}",
                 self.center_x,
                 self.center_y - 75,
                 arcade.color.BLACK,
@@ -250,9 +258,10 @@ class Player(arcade.Sprite):
             )
             hp.draw()
 
-    def setup_chracter(self):
+    def setup_character(self):
         print(self.character.name)
         print(self.character.desc)
         print(self.character.generate_detailed_desc(self))
-        self.character.apply_mulitplayers(self)
-        self.character.chracter_start_skills(self)
+        self.character.apply_multiplayer(self)
+        self.character.character_start_skills(self)
+        self.character.character_variables_modifiers(self)
