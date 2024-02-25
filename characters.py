@@ -57,8 +57,8 @@ class Character:
         """
         Static modifiers apply to player
         """
-        playerObject.walk_time_interval += playerObject.walk_time_interval * self.base_movement_speed
-        playerObject.sprint_time_interval += playerObject.sprint_time_interval * self.base_movement_speed
+        playerObject.walk_time_interval /= self.base_movement_speed
+        playerObject.sprint_time_interval /= self.base_movement_speed
 
     def generate_detailed_desc(self, playerObject):
         desc = ""

@@ -4,6 +4,7 @@ import player as pl
 import fight
 import NPC as npc
 import gui
+import characters
 
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
@@ -47,6 +48,7 @@ class GameView(arcade.View):
 
     def setup(self):
         self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.camera.move_to((self.playerObject.center_x - (SCREEN_WIDTH/2), self.playerObject.center_y-(SCREEN_HEIGHT/2)), 1)
         self.gui_camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
 
         self.tile_map = arcade.load_tilemap("maps/notepad/Notepad.tmx", 2)
@@ -86,8 +88,7 @@ class GameView(arcade.View):
             bar.draw()
 
         # self.draw_gui()
-        self.playerObject.show_stamina()
-        self.playerObject.show_hp()
+        self.playerObject.show_bars()
 
     def draw_gui(self):
         self.gui_camera.use()
@@ -97,9 +98,8 @@ class GameView(arcade.View):
         self.physics_engine.step()
         self.playerObject.movement(self.camera, CAMERA_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT, self.physics_engine)
         self.playerObject.update_player(self.physics_engine)
+        print(self.playerObject.walk_time_interval)
         fight.update(self.playerObject, self.physics_engine, self.scene)
-
-        self.scene.update_animation(delta_time, ["Player"])
         if arcade.key.K in self.playerObject.keys:
             self.playerObject.hp = random.randint(1, self.playerObject.max_hp)
 
@@ -109,12 +109,11 @@ class GameView(arcade.View):
 
 
 def main():
-    player_object = pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2)
+    player_object = pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2, characters.Wizard())
     window = GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, player_object)
     start_view = GameView(player_object)
     window.show_view(start_view)
     start_view.setup()
-    window.current_view.camera.move_to((player_object.center_x - (SCREEN_WIDTH/2), player_object.center_y-(SCREEN_HEIGHT/2)), 1)
     arcade.run()
 
 

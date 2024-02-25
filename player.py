@@ -2,15 +2,14 @@ import arcade
 import time
 from pyglet.math import Vec2
 import gui
-import characters
 
 DELTA_TIME = 1 / 60
 
 
 class Player(arcade.Sprite):
-    def __init__(self, sprite_path, x, y):
+    def __init__(self, sprite_path, x, y, character):
         super().__init__(filename=sprite_path, center_x=x, center_y=y, scale=0.8)
-        self.character = characters.Wizard()
+        self.character = character
 
         self.movement_speed = 5000
         self.sprint_multiplayer = 1.25
@@ -21,8 +20,9 @@ class Player(arcade.Sprite):
         self.dash_stamina_use = 10
 
         self.dash_force = [0, 0]
-        self.default_dash_duration = 0.3
         self.dash_duration = 0
+
+        self.default_dash_duration = 0.3
         self.dash_last_time = time.perf_counter() - self.dash_cooldown
 
         self.last_time_slash = 0
@@ -40,12 +40,12 @@ class Player(arcade.Sprite):
         self.hp = 99999999
         self.max_hp = 100
         self.can_regen_hp = True
-        self.hp_regen_rate = 1
+        self.hp_regen_rate = 1  # Per second
 
         self.stamina = 9999999999
         self.max_stamina = 10
         self.can_regen_stamina = True
-        self.stamina_regen_rate = 2
+        self.stamina_regen_rate = 2  # Per second
         self.stamina_sprint_use = 3  # Per second
 
         self.strength = 10  # Close range
@@ -57,28 +57,13 @@ class Player(arcade.Sprite):
         self.cur_texture = 1
         self.time_counter = 0
 
-        self.idle = []
-        for i in range(1, 3):
-            try:
-                self.idle.append(arcade.load_texture(f"sprites/player/{self.character.name.lower()}/player_idle_{i}.png"))
-            except:
-                self.idle.append(arcade.load_texture(f"sprites/player/stickman/player_idle_{i}.png"))
-
-        self.idle_animation_count = len(self.idle)
         self.idle_time_interval = 1
 
-        self.move = []
-        for i in range(1, 5):
-            try:
-                self.move.append(arcade.load_texture(f"sprites/player/{self.character.name.lower()}/player_walk_{i}.png"))
-            except:
-                self.move.append(arcade.load_texture(f"sprites/player/stickman/player_walk_{i}.png"))
-        self.move_animation_count = len(self.move)
         self.move_time_interval = 0
         self.sprint_time_interval = 0.3
         self.walk_time_interval = 0.5
 
-        self.setup_character()
+        self._setup_character()
 
     def movement(self, camera, camera_speed, width, height, physics_engine):
         """Pełny Ruch Gracza"""
@@ -176,7 +161,30 @@ class Player(arcade.Sprite):
             move_camera_to_player(camera_speed)
 
     def update_player(self, physics_engine):
+        def _update_animation(delta_time: float = 1 / 60):
+            if self.ifAttack:
+                self.cur_texture = 0
+                self.direction_move = self.direction_attack
+            elif self.moving:
+                self.time_counter += delta_time
+                if self.time_counter >= self.move_time_interval:
+                    self.cur_texture += 1
+                    self.time_counter = 0
+                if self.cur_texture > self.move_animation_count - 1:
+                    self.cur_texture = 0
+                self.texture = self.move[self.cur_texture]
+            else:
+                self.time_counter += delta_time
+                if self.time_counter >= self.idle_time_interval:
+                    self.cur_texture += 1
+                    self.time_counter = 0
+                if self.cur_texture > self.idle_animation_count - 1:
+                    self.cur_texture = 0
+                self.texture = self.idle[self.cur_texture]
+
         self.character.character_skills(self)
+        _update_animation()
+
         if self.can_regen_hp:
             self.hp += DELTA_TIME * self.hp_regen_rate
         if self.can_regen_stamina:
@@ -206,28 +214,7 @@ class Player(arcade.Sprite):
             self.dash_duration -= DELTA_TIME
             physics_engine.apply_force(self, self.dash_force)
 
-    def update_animation(self, delta_time: float = 1 / 60):
-        if self.ifAttack:
-            self.cur_texture = 0
-            self.direction_move = self.direction_attack
-        elif self.moving:
-            self.time_counter += delta_time
-            if self.time_counter >= self.move_time_interval:
-                self.cur_texture += 1
-                self.time_counter = 0
-            if self.cur_texture > self.move_animation_count - 1:
-                self.cur_texture = 0
-            self.texture = self.move[self.cur_texture]
-        else:
-            self.time_counter += delta_time
-            if self.time_counter >= self.idle_time_interval:
-                self.cur_texture += 1
-                self.time_counter = 0
-            if self.cur_texture > self.idle_animation_count - 1:
-                self.cur_texture = 0
-            self.texture = self.idle[self.cur_texture]
-
-    def show_stamina(self):
+    def show_bars(self):
         if self.stamina != self.max_stamina and not self.max_stamina == 0 and not self.stamina < 0:
             stamina_bar = gui.IndicatorBar(self.center_x, self.center_y + 70,
                                            "sprites/gui/bars/bar_full.png", "sprites/gui/bars/Bar.png", 80, 14, 2)
@@ -247,8 +234,6 @@ class Player(arcade.Sprite):
                 bold=True
             )
             stamina.draw()
-
-    def show_hp(self):
         if self.hp != self.max_hp:
             hp_bar = gui.IndicatorBar(self.center_x, self.center_y - 70,
                                       "sprites/gui/bars/bar_full.png", "sprites/gui/bars/Bar.png", 100, 16, 2)
@@ -269,10 +254,31 @@ class Player(arcade.Sprite):
             )
             hp.draw()
 
-    def setup_character(self):
+    def _setup_character(self):
         print(self.character.name)
         print(self.character.desc)
         print(self.character.generate_detailed_desc(self))
         self.character.apply_multiplayer(self)
         self.character.character_start_skills(self)
         self.character.character_variables_modifiers(self)
+
+        self._load_textures()
+
+    def _load_textures(self):
+        self.idle = []
+        for i in range(1, 3):
+            try:
+                self.idle.append(
+                    arcade.load_texture(f"sprites/player/{self.character.name.lower()}/player_idle_{i}.png"))
+            except:
+                self.idle.append(arcade.load_texture(f"sprites/player/stickman/player_idle_{i}.png"))
+        self.idle_animation_count = len(self.idle)
+
+        self.move = []
+        for i in range(1, 5):
+            try:
+                self.move.append(
+                    arcade.load_texture(f"sprites/player/{self.character.name.lower()}/player_walk_{i}.png"))
+            except:
+                self.move.append(arcade.load_texture(f"sprites/player/stickman/player_walk_{i}.png"))
+        self.move_animation_count = len(self.move)
