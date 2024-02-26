@@ -30,8 +30,8 @@ class IndicatorBar:
         self._box_width: int = width
         self._box_height: int = height
         self._full_width: int = self._box_width
-        self._center_x: float = center_x
-        self._center_y: float = center_y
+        self.center_x: float = center_x
+        self.center_y: float = center_y
         self._fullness: float = 0.0
         self.border_size = border_size
 
@@ -43,9 +43,9 @@ class IndicatorBar:
         self.fullness: float = 1.0
 
     def draw(self):
-        self._background_box.draw_sized(self._center_x, self._center_y, self._box_width + self.border_size, self._box_height + self.border_size)
-        # self._full_box.draw_sized(self._center_x - (self._box_width / 2) + (self._full_width / 2), self._center_y, self._full_width, self._box_height)
-        arcade.draw_rectangle_filled(self._center_x - (self._box_width / 2) + (self._full_width / 2), self._center_y, self._full_width, self._box_height, (0, 0, 0, 100))
+        self._background_box.draw_sized(self.center_x, self.center_y, self._box_width + self.border_size, self._box_height + self.border_size)
+        # self._full_box.draw_sized(self.center_x - (self._box_width / 2) + (self._full_width / 2), self.center_y, self._full_width, self._box_height)
+        arcade.draw_rectangle_filled(self.center_x - (self._box_width / 2) + (self._full_width / 2), self.center_y, self._full_width, self._box_height, (0, 0, 0, 100))
 
     @property
     def fullness(self) -> float:
@@ -67,9 +67,9 @@ class IndicatorBar:
     @property
     def position(self) -> Tuple[float, float]:
         """Returns the current position of the bar."""
-        return self._center_x, self._center_y
+        return self.center_x, self.center_y
 
     @position.setter
     def position(self, new_position: Tuple[float, float]) -> None:
         """Changes the current position of the bar."""
-        self._center_x, self._center_y = new_position
+        self.center_x, self.center_y = new_position

@@ -1,8 +1,10 @@
 import random
 import arcade
+
+import enemies
 import player as pl
 import fight
-import NPC as npc
+import enemies as npc
 import gui
 import characters
 
@@ -58,9 +60,10 @@ class GameView(arcade.View):
 
         self.scene.add_sprite_list("Player")
         self.scene.add_sprite_list("Slash")
+        self.scene.add_sprite_list("Enemies")
         self.scene.add_sprite("Player", self.playerObject)
 
-        self.scene.add_sprite_list("NPC")
+        self.scene.add_sprite("Enemies", enemies.Slime(self.playerObject.center_x - 60, self.playerObject.center_y))
 
         self.physics_engine = arcade.PymunkPhysicsEngine(damping=0)
         self.physics_engine.add_sprite(self.playerObject,
@@ -71,8 +74,8 @@ class GameView(arcade.View):
         self.physics_engine.add_sprite_list(self.scene.get_sprite_list("collision"),
                                             collision_type="wall",
                                             body_type=arcade.PymunkPhysicsEngine.STATIC)
-        self.physics_engine.add_sprite_list(self.scene.get_sprite_list("NPC"),
-                                            collision_type="NPC",
+        self.physics_engine.add_sprite_list(self.scene.get_sprite_list("Enemies"),
+                                            collision_type="Enemies",
                                             moment_of_intertia=1000000)
 
     def on_draw(self):
@@ -83,9 +86,8 @@ class GameView(arcade.View):
 
         self.camera.use()
 
-        for n in self.scene.get_sprite_list("NPC"):
-            bar = n.show_health()
-            bar.draw()
+        for e in self.scene.get_sprite_list("Enemies"):
+            e.show_hp()
 
         # self.draw_gui()
         self.playerObject.show_bars()
@@ -96,10 +98,15 @@ class GameView(arcade.View):
 
     def on_update(self, delta_time):
         self.physics_engine.step()
+
         self.playerObject.movement(self.camera, CAMERA_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT, self.physics_engine)
         self.playerObject.update_player(self.physics_engine)
-        print(self.playerObject.walk_time_interval)
+
+        for e in self.scene.get_sprite_list("Enemies"):
+            e.update_enemy()
+
         fight.update(self.playerObject, self.physics_engine, self.scene)
+
         if arcade.key.K in self.playerObject.keys:
             self.playerObject.hp = random.randint(1, self.playerObject.max_hp)
 
