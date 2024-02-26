@@ -4,7 +4,7 @@ import gui
 
 class Enemy(arcade.Sprite):
     def __init__(self, name, pos_x, pos_y, coin_drop=0, hp=1, defence=1, dodge=1, move_speed=1, drop=None):
-        super().__init__(filename=f"sprites/enemies/{name.lower()}/{name.lower()}_idle_1.png", center_x=pos_x, center_y=pos_y, scale=1)
+        super().__init__(filename=f"sprites/enemies/{name.lower()}/{name.lower()}_base.png", center_x=pos_x, center_y=pos_y, scale=1)
         self.name = name
 
         self.hp = hp
@@ -22,7 +22,6 @@ class Enemy(arcade.Sprite):
         self.ifMoving = False
 
         self.move_time_interval = 1
-        self.idle_time_interval = 1
         self.cur_texture = 1
         self.time_counter = 0
 
@@ -50,12 +49,6 @@ class Enemy(arcade.Sprite):
         hp.draw()
 
     def _load_textures(self):
-        self.idle = []
-        for i in range(1, 5):
-            self.idle.append(
-                arcade.load_texture(f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_idle_{i}.png"))
-        self.idle_animation_count = len(self.idle)
-
         self.move = []
         for i in range(1, 6):
             self.move.append(
@@ -78,13 +71,7 @@ class Enemy(arcade.Sprite):
                 self.cur_texture = 0
             self.texture = self.move[self.cur_texture]
         else:
-            self.time_counter += delta_time
-            if self.time_counter >= self.idle_time_interval:
-                self.cur_texture += 1
-                self.time_counter = 0
-            if self.cur_texture > self.idle_animation_count - 1:
-                self.cur_texture = 0
-            self.texture = self.idle[self.cur_texture]
+            self.texture = arcade.load_texture(f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_base.png")
  
            
 class Slime(Enemy):
@@ -93,4 +80,3 @@ class Slime(Enemy):
         self.name = "Slime"
         self.ifMoving = True
         self.move_time_interval = 0.2
-        self.idle_time_interval = 0.5
