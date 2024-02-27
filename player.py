@@ -56,6 +56,8 @@ class Player(arcade.Sprite):
 
         self.cur_texture = 1
         self.time_counter = 0
+        self._alpha_counter = 255
+        self.playHitAnimation = False
 
         self.idle_time_interval = 1
 
@@ -161,29 +163,7 @@ class Player(arcade.Sprite):
             move_camera_to_player(camera_speed)
 
     def update_player(self, physics_engine):
-        def _update_animation(delta_time: float = 1 / 60):
-            if self.ifAttack:
-                self.cur_texture = 0
-                self.direction_move = self.direction_attack
-            elif self.moving:
-                self.time_counter += delta_time
-                if self.time_counter >= self.move_time_interval:
-                    self.cur_texture += 1
-                    self.time_counter = 0
-                if self.cur_texture > self.move_animation_count - 1:
-                    self.cur_texture = 0
-                self.texture = self.move[self.cur_texture]
-            else:
-                self.time_counter += delta_time
-                if self.time_counter >= self.idle_time_interval:
-                    self.cur_texture += 1
-                    self.time_counter = 0
-                if self.cur_texture > self.idle_animation_count - 1:
-                    self.cur_texture = 0
-                self.texture = self.idle[self.cur_texture]
-
         self.character.character_skills(self)
-        _update_animation()
 
         if self.can_regen_hp:
             self.hp += DELTA_TIME * self.hp_regen_rate
@@ -213,6 +193,41 @@ class Player(arcade.Sprite):
                     self.dash_force[1] -= dash_increment
             self.dash_duration -= DELTA_TIME
             physics_engine.apply_force(self, self.dash_force)
+
+        def _update_animation(delta_time: float = 1 / 60):
+            if self.ifAttack:
+                self.cur_texture = 0
+                self.direction_move = self.direction_attack
+            elif self.moving:
+                self.time_counter += delta_time
+                if self.time_counter >= self.move_time_interval:
+                    self.cur_texture += 1
+                    self.time_counter = 0
+                if self.cur_texture > self.move_animation_count - 1:
+                    self.cur_texture = 0
+                self.texture = self.move[self.cur_texture]
+            else:
+                self.time_counter += delta_time
+                if self.time_counter >= self.idle_time_interval:
+                    self.cur_texture += 1
+                    self.time_counter = 0
+                if self.cur_texture > self.idle_animation_count - 1:
+                    self.cur_texture = 0
+                self.texture = self.idle[self.cur_texture]
+
+            def _hit_animation():
+                self.color = (255, 255, 255, self._alpha_counter)
+                self._alpha_counter -= 20
+                if self._alpha_counter < 70:
+                    self.playHitAnimation = False
+                    self._alpha_counter = 255
+                    self.color = (255, 255, 255, 255)
+
+            if self.playHitAnimation:
+                self.playHitAnimation = True
+                _hit_animation()
+
+        _update_animation()
 
     def show_bars(self):
         if self.stamina != self.max_stamina and not self.max_stamina == 0 and not self.stamina < 0:
@@ -282,3 +297,7 @@ class Player(arcade.Sprite):
             except:
                 self.move.append(arcade.load_texture(f"sprites/player/stickman/player_walk_{i}.png"))
         self.move_animation_count = len(self.move)
+
+    def damage(self,hp):
+        self.hp -= hp
+        self.playHitAnimation = True

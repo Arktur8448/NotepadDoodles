@@ -42,6 +42,7 @@ class GameView(arcade.View):
         self.scene = None
 
         self.physics_engine = None
+        self.enemy_physics_engine = None
 
         self.camera = None
         self.gui_camera = None
@@ -50,7 +51,8 @@ class GameView(arcade.View):
 
     def setup(self):
         self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
-        self.camera.move_to((self.playerObject.center_x - (SCREEN_WIDTH/2), self.playerObject.center_y-(SCREEN_HEIGHT/2)), 1)
+        self.camera.move_to(
+            (self.playerObject.center_x - (SCREEN_WIDTH / 2), self.playerObject.center_y - (SCREEN_HEIGHT / 2)), 1)
         self.gui_camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
 
         self.tile_map = arcade.load_tilemap("maps/notepad/Notepad.tmx", 2)
@@ -63,7 +65,9 @@ class GameView(arcade.View):
         self.scene.add_sprite_list("Enemies")
         self.scene.add_sprite("Player", self.playerObject)
 
-        self.scene.add_sprite("Enemies", enemies.Slime(self.playerObject.center_x - 60, self.playerObject.center_y))
+        for i in range(0, 10):
+            self.scene.add_sprite("Enemies", enemies.Slime(self.playerObject.center_x + random.randint(-500, 500),
+                                                           self.playerObject.center_y + random.randint(-500, 500)))
 
         self.physics_engine = arcade.PymunkPhysicsEngine(damping=0)
         self.physics_engine.add_sprite(self.playerObject,
@@ -74,14 +78,16 @@ class GameView(arcade.View):
         self.physics_engine.add_sprite_list(self.scene.get_sprite_list("collision"),
                                             collision_type="wall",
                                             body_type=arcade.PymunkPhysicsEngine.STATIC)
-        self.physics_engine.add_sprite_list(self.scene.get_sprite_list("Enemies"),
-                                            collision_type="Enemies",
-                                            moment_of_intertia=1000000)
+
+        self.enemy_physics_engine = arcade.PymunkPhysicsEngine(damping=0)
+        self.enemy_physics_engine.add_sprite_list(self.scene.get_sprite_list("Enemies"),
+                                                  collision_type="Enemies",
+                                                  moment_of_intertia=1000000)
 
     def on_draw(self):
         self.clear()
         self.scene.draw(pixelated=True)
-        # self.scene.draw_hit_boxes((255, 0, 0), 1, ["Player", "collision"])
+        # self.scene.draw_hit_boxes((255, 0, 0), 1, ["Player", "Enemies"])
         self.scene.get_sprite_list("Slash").visible = False
 
         self.camera.use()
@@ -98,17 +104,23 @@ class GameView(arcade.View):
 
     def on_update(self, delta_time):
         self.physics_engine.step()
+        self.enemy_physics_engine.step()
 
         self.playerObject.movement(self.camera, CAMERA_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT, self.physics_engine)
         self.playerObject.update_player(self.physics_engine)
 
         for e in self.scene.get_sprite_list("Enemies"):
-            e.update_enemy()
+            e.update_enemy(self.playerObject, self.enemy_physics_engine)
 
         fight.update(self.playerObject, self.physics_engine, self.scene)
 
+        if arcade.key.ESCAPE in self.playerObject.keys:
+            arcade.exit()
+
         if arcade.key.K in self.playerObject.keys:
-            self.playerObject.hp = random.randint(1, self.playerObject.max_hp)
+            del self.playerObject.keys[arcade.key.K]
+            self.scene.get_sprite_list("Enemies")[0].damage(1)
+            self.playerObject.damage(1)
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if button == 1:
