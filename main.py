@@ -1,10 +1,8 @@
 import random
 import arcade
-
 import enemies
 import player as pl
 import fight
-import enemies as npc
 import gui
 import characters
 
@@ -65,9 +63,14 @@ class GameView(arcade.View):
         self.scene.add_sprite_list("Enemies")
         self.scene.add_sprite("Player", self.playerObject)
 
-        for i in range(0, 10):
-            self.scene.add_sprite("Enemies", enemies.Slime(self.playerObject.center_x + random.randint(-500, 500),
-                                                           self.playerObject.center_y + random.randint(-500, 500)))
+        for i in range(0, 3):
+            # self.scene.add_sprite("Enemies", enemies.Slime(self.playerObject.center_x + random.randint(-500, 500),
+            #                                                self.playerObject.center_y + random.randint(-500, 500)))
+            self.scene.add_sprite("Enemies", enemies.SlimeMedium(self.playerObject.center_x + random.randint(-500, 500),
+                                                                 self.playerObject.center_y + random.randint(-500,
+                                                                                                             500)))
+            self.scene.add_sprite("Enemies", enemies.SlimeBig(self.playerObject.center_x + random.randint(-500, 500),
+                                                              self.playerObject.center_y + random.randint(-500, 500)))
 
         self.physics_engine = arcade.PymunkPhysicsEngine(damping=0)
         self.physics_engine.add_sprite(self.playerObject,
@@ -110,7 +113,7 @@ class GameView(arcade.View):
         self.playerObject.update_player(self.physics_engine)
 
         for e in self.scene.get_sprite_list("Enemies"):
-            e.update_enemy(self.playerObject, self.enemy_physics_engine)
+            e.update_enemy(self.playerObject, self.enemy_physics_engine, self.scene)
 
         fight.update(self.playerObject, self.physics_engine, self.scene)
 
@@ -119,8 +122,7 @@ class GameView(arcade.View):
 
         if arcade.key.K in self.playerObject.keys:
             del self.playerObject.keys[arcade.key.K]
-            self.scene.get_sprite_list("Enemies")[0].damage(1)
-            self.playerObject.damage(1)
+            self.scene.get_sprite_list("Enemies")[0].damage(10000)
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if button == 1:

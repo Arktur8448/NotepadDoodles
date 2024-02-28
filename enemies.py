@@ -3,7 +3,7 @@ import gui
 
 
 class Enemy(arcade.Sprite):
-    def __init__(self, name, pos_x, pos_y, coin_drop=0, hp=1, defence=1, dodge=1, move_speed=1, drop=None):
+    def __init__(self, name, pos_x, pos_y, coin_drop=0, hp=1, defence=1, dodge=1, move_speed=1.0, drop=None):
         super().__init__(filename=f"sprites/enemies/{name.lower()}/{name.lower()}_base.png", center_x=pos_x, center_y=pos_y, scale=1)
         self.name = name
 
@@ -29,25 +29,28 @@ class Enemy(arcade.Sprite):
         self.playHitAnimation = False
 
         self.direction_move = "Right"
+        
+        self.modify_bar_pos_y = 0.6
+        self.modify_bar_scale = 0.75
+
+        self.scene = None
 
     def show_hp(self):
-        modify_pos_y = 0.6
-        modify_scale = 0.75
-        hp_bar = gui.IndicatorBar(self.center_x, self.center_y - 70 * modify_pos_y,
+        hp_bar = gui.IndicatorBar(self.center_x, self.center_y - 70 * self.modify_bar_pos_y,
                                   "sprites/gui/bars/bar_full.png", "sprites/gui/bars/Bar.png",
-                                  100 * modify_scale, 16 * modify_scale, 2 * modify_scale)
+                                  100 * self.modify_bar_scale, 16 * self.modify_bar_scale, 2 * self.modify_bar_scale)
         hp_bar.fullness = self.hp / self.max_hp
         hp_bar.draw()
-        heart = arcade.Sprite("sprites/gui/bars/Heart.png", scale=0.5 * modify_scale)
-        heart.center_x = self.center_x - 50 * modify_scale
-        heart.center_y = self.center_y - 65 * modify_pos_y
+        heart = arcade.Sprite("sprites/gui/bars/Heart.png", scale=0.5 * self.modify_bar_scale)
+        heart.center_x = self.center_x - 50 * self.modify_bar_scale
+        heart.center_y = self.center_y - 65 * self.modify_bar_pos_y
         heart.draw()
         hp = arcade.Text(
             f"{int(self.hp)}/{int(self.max_hp)}",
             self.center_x,
-            self.center_y - 75 * modify_pos_y,
+            self.center_y - 75 * self.modify_bar_pos_y,
             arcade.color.BLACK,
-            12 * modify_scale,
+            12 * self.modify_bar_scale,
             anchor_x="center",
             bold=True
         )
@@ -61,12 +64,14 @@ class Enemy(arcade.Sprite):
         self.move_right = []
         for i in range(1, 6):
             self.move_right.append(
-                arcade.load_texture(f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_walk_{i}.png" , flipped_horizontally=True))
+                arcade.load_texture(f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_walk_{i}.png", flipped_horizontally=True))
 
         self.move_animation_count = len(self.move_right)
         self.idle_texture = arcade.load_texture(f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_base.png")
 
-    def update_enemy(self, playerObject, physics_engine):
+    def update_enemy(self, playerObject, physics_engine, scene):
+        self.scene = scene
+
         def move_to_player():
             self.ifMoving = True
             delta_y = playerObject.center_y - self.center_y
@@ -120,16 +125,47 @@ class Enemy(arcade.Sprite):
         _update_animation()
 
         if self.hp <= 0:
-            self.kill()
+            self.die()
         
     def damage(self, hp):
         self.hp -= hp
         self.playHitAnimation = True
+
+    def die(self):
+        self.die_effect()
+        self.kill()
+
+    def die_effect(self):
+        pass
             
         
 class Slime(Enemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, coin_drop=10, hp=10, defence=0, dodge=10, move_speed=1)
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, coin_drop=5, hp=5, defence=0, dodge=10, move_speed=1)
         self.name = "Slime"
         self.move_time_interval = 0.2
+        self.scale = 0.8
+        self.modify_bar_pos_y = 0.4
 
+
+class SlimeMedium(Enemy):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, coin_drop=10, hp=10, defence=1, dodge=5, move_speed=0.75)
+        self.name = "Slime"
+        self.move_time_interval = 0.2
+        self.scale = 1.25
+
+    def die_effect(self):
+        self.scene.add_sprite("Enemies", Slime(self.center_x, self.center_y))
+
+
+class SlimeBig(Enemy):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, coin_drop=20, hp=30, defence=2, dodge=3, move_speed=0.6)
+        self.name = "Slime"
+        self.move_time_interval = 0.2
+        self.scale = 1.5
+        self.modify_bar_pos_y = 0.7
+
+    def die_effect(self):
+        self.scene.add_sprite("Enemies", SlimeMedium(self.center_x, self.center_y))
