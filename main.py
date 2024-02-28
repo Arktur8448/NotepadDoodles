@@ -113,7 +113,13 @@ class GameView(arcade.View):
         self.playerObject.update_player(self.physics_engine)
 
         for e in self.scene.get_sprite_list("Enemies"):
-            e.update_enemy(self.playerObject, self.enemy_physics_engine, self.scene)
+            try:
+                e.update_enemy(self.playerObject, self.enemy_physics_engine, self.scene)
+            except:
+                self.enemy_physics_engine = arcade.PymunkPhysicsEngine(damping=0)
+                self.enemy_physics_engine.add_sprite_list(self.scene.get_sprite_list("Enemies"),
+                                                          collision_type="Enemies",
+                                                          moment_of_intertia=1000000)
 
         fight.update(self.playerObject, self.physics_engine, self.scene)
 

@@ -157,6 +157,7 @@ class SlimeMedium(Enemy):
 
     def die_effect(self):
         self.scene.add_sprite("Enemies", Slime(self.center_x, self.center_y))
+        self.scene.add_sprite("Enemies", Slime(self.center_x, self.center_y))
 
 
 class SlimeBig(Enemy):
@@ -168,4 +169,5 @@ class SlimeBig(Enemy):
         self.modify_bar_pos_y = 0.7
 
     def die_effect(self):
+        self.scene.add_sprite("Enemies", SlimeMedium(self.center_x, self.center_y))
         self.scene.add_sprite("Enemies", SlimeMedium(self.center_x, self.center_y))
