@@ -61,9 +61,10 @@ class GameView(arcade.View):
         self.scene.add_sprite_list("Player")
         self.scene.add_sprite_list("Slash")
         self.scene.add_sprite_list("Enemies")
+        self.scene.add_sprite_list("EnemiesBars")
         self.scene.add_sprite("Player", self.playerObject)
 
-        for i in range(0, 3):
+        for i in range(0, 10):
             self.scene.add_sprite("Enemies", enemies.Slime(self.playerObject.center_x + random.randint(-500, 500),
                                                            self.playerObject.center_y + random.randint(-500, 500)))
             self.scene.add_sprite("Enemies", enemies.SlimeMedium(self.playerObject.center_x + random.randint(-500, 500),
@@ -87,6 +88,8 @@ class GameView(arcade.View):
                                                   collision_type="Enemies",
                                                   moment_of_intertia=1000000)
 
+        arcade.enable_timings()
+
     def on_draw(self):
         self.clear()
         self.scene.draw(pixelated=True)
@@ -98,11 +101,19 @@ class GameView(arcade.View):
         for e in self.scene.get_sprite_list("Enemies"):
             e.show_hp()
 
-        # self.draw_gui()
+        self.draw_gui()
         self.playerObject.show_bars()
 
     def draw_gui(self):
         self.gui_camera.use()
+        fps = arcade.Text(
+            str(int(arcade.perf_info.get_fps())),
+            SCREEN_WIDTH - 40,
+            SCREEN_HEIGHT - 30,
+            (0, 0, 0, 150),
+            20
+        )
+        fps.draw()
         self.camera.use()
 
     def on_update(self, delta_time):
@@ -128,7 +139,7 @@ class GameView(arcade.View):
 
         if arcade.key.K in self.playerObject.keys:
             del self.playerObject.keys[arcade.key.K]
-            self.scene.get_sprite_list("Enemies")[0].damage(10000)
+            random.choice(self.scene.get_sprite_list("Enemies")).damage(1)
 
     def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
         if button == 1:

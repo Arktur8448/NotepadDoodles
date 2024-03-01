@@ -249,6 +249,25 @@ class Player(arcade.Sprite):
                 bold=True
             )
             stamina.draw()
+        elif self.stamina < 0:
+            stamina_bar = gui.IndicatorBar(self.center_x, self.center_y + 70,
+                                           "sprites/gui/bars/bar_full.png", "sprites/gui/bars/Bar.png", 80, 14, 2)
+            stamina_bar.fullness = 0
+            stamina_bar.draw()
+            piorun = arcade.Sprite("sprites/gui/bars/Piorun.png", scale=0.5)
+            piorun.center_x = self.center_x - 42
+            piorun.center_y = self.center_y + 70
+            piorun.draw()
+            stamina = arcade.Text(
+                f"{0}/{int(self.max_stamina)}",
+                self.center_x,
+                self.center_y + 65,
+                arcade.color.BLACK,
+                10,
+                anchor_x="center",
+                bold=True
+            )
+            stamina.draw()
         if self.hp != self.max_hp:
             hp_bar = gui.IndicatorBar(self.center_x, self.center_y - 70,
                                       "sprites/gui/bars/bar_full.png", "sprites/gui/bars/Bar.png", 100, 16, 2)
