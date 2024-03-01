@@ -35,6 +35,9 @@ class Enemy(arcade.Sprite):
 
         self.scene = None
 
+        self._time_move_counter = -1
+        self._move_force = (0, 0)
+
     def show_hp(self):
         hp_bar = gui.IndicatorBar(self.center_x, self.center_y - 70 * self.modify_bar_pos_y,
                                   "sprites/gui/bars/bar_full.png", "sprites/gui/bars/Bar.png",
@@ -74,21 +77,28 @@ class Enemy(arcade.Sprite):
 
         def move_to_player():
             self.ifMoving = True
-            delta_y = playerObject.center_y - self.center_y
-            delta_x = playerObject.center_x - self.center_x
 
-            if abs(delta_y) > abs(delta_x):
-                if delta_y > 0:
-                    physics_engine.apply_force(self, (0, self.move_speed))
-                elif delta_y < 0:
-                    physics_engine.apply_force(self, (0, -self.move_speed))
-            else:
-                if delta_x > 0:
-                    physics_engine.apply_force(self, (self.move_speed, 0))
-                    self.direction_move = "Left"
-                elif delta_x < 0:
-                    physics_engine.apply_force(self, (-self.move_speed, 0))
-                    self.direction_move = "Right"
+            self._time_move_counter -= 1 / 60
+            if self._time_move_counter < 0:
+                self._time_move_counter = 1
+
+                delta_y = playerObject.center_y - self.center_y
+                delta_x = playerObject.center_x - self.center_x
+
+                if abs(delta_y) > abs(delta_x):
+                    if delta_y > 0:
+                        self._move_force = (0, self.move_speed)
+                    elif delta_y < 0:
+                        self._move_force = (0, -self.move_speed)
+                else:
+                    if delta_x > 0:
+                        self._move_force = (self.move_speed, 0)
+                        self.direction_move = "Left"
+                    elif delta_x < 0:
+                        self._move_force = (-self.move_speed, 0)
+                        self.direction_move = "Right"
+
+            physics_engine.apply_force(self, self._move_force)
 
         move_to_player()
 

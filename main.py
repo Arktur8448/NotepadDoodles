@@ -64,8 +64,8 @@ class GameView(arcade.View):
         self.scene.add_sprite("Player", self.playerObject)
 
         for i in range(0, 3):
-            # self.scene.add_sprite("Enemies", enemies.Slime(self.playerObject.center_x + random.randint(-500, 500),
-            #                                                self.playerObject.center_y + random.randint(-500, 500)))
+            self.scene.add_sprite("Enemies", enemies.Slime(self.playerObject.center_x + random.randint(-500, 500),
+                                                           self.playerObject.center_y + random.randint(-500, 500)))
             self.scene.add_sprite("Enemies", enemies.SlimeMedium(self.playerObject.center_x + random.randint(-500, 500),
                                                                  self.playerObject.center_y + random.randint(-500,
                                                                                                              500)))
