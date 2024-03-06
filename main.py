@@ -64,7 +64,7 @@ class GameView(arcade.View):
         self.scene.add_sprite_list("EnemiesBars")
         self.scene.add_sprite("Player", self.playerObject)
 
-        for i in range(0, 10):
+        for i in range(0, 3):
             self.scene.add_sprite("Enemies", enemies.Slime(self.playerObject.center_x + random.randint(-500, 500),
                                                            self.playerObject.center_y + random.randint(-500, 500)))
             self.scene.add_sprite("Enemies", enemies.SlimeMedium(self.playerObject.center_x + random.randint(-500, 500),
@@ -121,7 +121,7 @@ class GameView(arcade.View):
         self.enemy_physics_engine.step()
 
         self.playerObject.movement(self.camera, CAMERA_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT, self.physics_engine)
-        self.playerObject.update_player(self.physics_engine)
+        self.playerObject.update_player(self.physics_engine, self.scene)
 
         for e in self.scene.get_sprite_list("Enemies"):
             try:

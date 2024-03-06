@@ -3,7 +3,7 @@ import gui
 
 
 class Enemy(arcade.Sprite):
-    def __init__(self, name, pos_x, pos_y, coin_drop=0, hp=1, defence=1, dodge=1, move_speed=1.0, drop=None):
+    def __init__(self, name, pos_x, pos_y, coin_drop=0, hp=1, defence=1, dodge=1, move_speed=1.0, attack_damage=1, attack_cooldown=1, drop=None):
         super().__init__(filename=f"sprites/enemies/{name.lower()}/{name.lower()}_base.png", center_x=pos_x,
                          center_y=pos_y, scale=1)
         self.name = name
@@ -42,6 +42,12 @@ class Enemy(arcade.Sprite):
 
         self.distance = None
 
+        self.attack_cooldown = attack_cooldown
+        self._attack_cooldown_counter = 0
+        self.canAttack = False
+
+        self.attack_damage = attack_damage
+
     def _load_textures(self):
         self.move_left = []
         for i in range(1, 6):
@@ -59,6 +65,12 @@ class Enemy(arcade.Sprite):
     def update_enemy(self, playerObject, physics_engine, scene):
         self.scene = scene
 
+        if self._attack_cooldown_counter <= 0:
+            self._attack_cooldown_counter = 0
+            self.canAttack = True
+        else:
+            self._attack_cooldown_counter -= 1/60
+
         self.distance = ((playerObject.center_x - self.center_x) ** 2 + (
                 playerObject.center_y - self.center_y) ** 2) ** 0.5
 
@@ -66,7 +78,7 @@ class Enemy(arcade.Sprite):
             self._time_move_counter = 0
             self.ifMoving = True
             self._time_move_counter -= 1 / 60
-            if int(self._time_move_counter) % 2 == 0:
+            if int(self._time_move_counter) % 2 == 0 and self.distance > 15:
                 if self.distance < 500:
                     self._time_move_counter = 0
 
@@ -131,6 +143,11 @@ class Enemy(arcade.Sprite):
         self.hp -= hp
         self.playHitAnimation = True
 
+    def attack_player(self, playerObject):
+        self.canAttack = False
+        self._attack_cooldown_counter = self.attack_cooldown
+        playerObject.hp -= self.attack_damage
+
     def die(self):
         self.die_effect()
         self.kill()
@@ -149,7 +166,8 @@ class Enemy(arcade.Sprite):
 
 class Slime(Enemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, coin_drop=5, hp=5, defence=0, dodge=10, move_speed=1)
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, coin_drop=5, hp=5, defence=0, dodge=10, move_speed=1,
+                         attack_damage=2)
         self.name = "Slime"
         self.move_time_interval = 0.2
         self.scale = 0.8
@@ -159,7 +177,8 @@ class Slime(Enemy):
 class SlimeMedium(Enemy):
     def __init__(self, pos_x, pos_y):
         super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, coin_drop=10, hp=10, defence=1, dodge=5,
-                         move_speed=0.75)
+                         move_speed=0.75,
+                         attack_damage=7)
         self.name = "Slime"
         self.move_time_interval = 0.2
         self.scale = 1.25
@@ -172,7 +191,8 @@ class SlimeMedium(Enemy):
 class SlimeBig(Enemy):
     def __init__(self, pos_x, pos_y):
         super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, coin_drop=20, hp=30, defence=2, dodge=3,
-                         move_speed=0.6)
+                         move_speed=0.6,
+                         attack_damage=15)
         self.name = "Slime"
         self.move_time_interval = 0.2
         self.scale = 1.5

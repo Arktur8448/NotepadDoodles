@@ -24,6 +24,7 @@ class Player(arcade.Sprite):
 
         self.default_dash_duration = 0.3
         self.dash_last_time = time.perf_counter() - self.dash_cooldown
+        self.isDashing = False
 
         self.last_time_slash = 0
         self.slash_cooldown_time = 0
@@ -162,7 +163,7 @@ class Player(arcade.Sprite):
         if self.moving:
             move_camera_to_player(camera_speed)
 
-    def update_player(self, physics_engine):
+    def update_player(self, physics_engine, scene):
         self.character.character_skills(self)
 
         if self.can_regen_hp:
@@ -180,6 +181,7 @@ class Player(arcade.Sprite):
             self.stamina = self.max_stamina
 
         if self.dash_duration > 0:
+            self.isDashing = True
             dash_increment = (self.dash_duration * self.dash_distance) * 2
             if self.dash_force[0]:
                 if self.dash_force[0] > 0:
@@ -193,6 +195,8 @@ class Player(arcade.Sprite):
                     self.dash_force[1] -= dash_increment
             self.dash_duration -= DELTA_TIME
             physics_engine.apply_force(self, self.dash_force)
+        else:
+            self.isDashing = False
 
         def _update_animation(delta_time: float = 1 / 60):
             if self.ifAttack:
@@ -228,6 +232,12 @@ class Player(arcade.Sprite):
                 _hit_animation()
 
         _update_animation()
+
+        collision_with_enemies = self.collides_with_list(scene.get_sprite_list("Enemies"))
+
+        for e in collision_with_enemies:
+            if e.canAttack and not self.isDashing:
+                e.attack_player(self)
 
     def show_bars(self):
         if self.stamina != self.max_stamina and not self.max_stamina == 0 and not self.stamina < 0:
