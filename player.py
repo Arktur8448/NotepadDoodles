@@ -2,6 +2,7 @@ import arcade
 import time
 from pyglet.math import Vec2
 import gui
+import items
 
 DELTA_TIME = 1 / 60
 
@@ -65,6 +66,9 @@ class Player(arcade.Sprite):
         self.move_time_interval = 0
         self.sprint_time_interval = 0.3
         self.walk_time_interval = 0.5
+
+        self.weapons = [items.Weapon("sprites/player/slash.png", "TOPÓR", damage=10, speed=2, attack_range=1),
+                        items.Weapon("sprites/player/slash.png", "TOPÓR2", damage=2, speed=0.5, attack_range=0.75)]
 
         self._setup_character()
 

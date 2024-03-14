@@ -94,7 +94,6 @@ class GameView(arcade.View):
         self.clear()
         self.scene.draw(pixelated=True)
         # self.scene.draw_hit_boxes((255, 0, 0), 1, ["Player", "Enemies"])
-        self.scene.get_sprite_list("Slash").visible = False
 
         self.camera.use()
 
@@ -103,6 +102,12 @@ class GameView(arcade.View):
 
         self.draw_gui()
         self.playerObject.show_bars()
+
+        # DELETE
+        # texture = arcade.Texture.create_filled("col", (300, 300), (255, 255, 255))
+        # sprite = arcade.Sprite(texture=texture, center_x=self.playerObject.center_x,
+        #                        center_y=self.playerObject.center_y)
+        # sprite.draw()
 
     def draw_gui(self):
         self.gui_camera.use()
@@ -132,7 +137,7 @@ class GameView(arcade.View):
                                                           collision_type="Enemies",
                                                           moment_of_intertia=1000000)
 
-        fight.update(self.playerObject, self.physics_engine, self.scene)
+        fight.update(self)
 
         if arcade.key.ESCAPE in self.playerObject.keys:
             arcade.exit()
@@ -140,10 +145,6 @@ class GameView(arcade.View):
         if arcade.key.K in self.playerObject.keys:
             del self.playerObject.keys[arcade.key.K]
             random.choice(self.scene.get_sprite_list("Enemies")).damage(1)
-
-    def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
-        if button == 1:
-            fight.get_slash(self.playerObject, self.scene, x, y, self.playerObject.strength, 10, 0.2)
 
 
 def main():
