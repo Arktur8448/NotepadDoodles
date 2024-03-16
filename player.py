@@ -127,7 +127,7 @@ class Player(arcade.Sprite):
                     self.direction_move = "Right"
 
             if arcade.key.SPACE in self.keys:
-                if time.perf_counter() - self.dash_last_time > self.dash_cooldown and self.stamina > self.dash_stamina_use:
+                if time.perf_counter() - self.dash_last_time > self.dash_cooldown and self.stamina >= self.dash_stamina_use:
                     self.stamina -= self.dash_stamina_use
                     dash()
 

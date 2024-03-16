@@ -9,7 +9,7 @@ class WaveManager:
         for i in range(0, waves_count):
             self.waves.append(Wave())
         self.current_wave = self.waves[1]
-        self._current_wave_number = 1
+        self.current_wave_number = 1
 
     def get_wave(self, number):
         return self.waves[number]
@@ -17,8 +17,8 @@ class WaveManager:
     def update(self, scene):
         self.current_wave.update(scene)
         if self.current_wave.completed:
-            self._current_wave_number += 1
-            self.current_wave = self.waves[self._current_wave_number]
+            self.current_wave_number += 1
+            self.current_wave = self.waves[self.current_wave_number]
 
 
 class Wave:
@@ -27,8 +27,6 @@ class Wave:
         self.enemies = []
         self._default_enemy_cooldown_spawner = 0.5
         self._enemy_cooldown_spawner = 0
-        self.width = 3950
-        self.height = 3530
         self.completed = False
 
     def add_enemy(self, enemy, amount):
@@ -47,11 +45,11 @@ class Wave:
                 enemy[1] -= 1
                 playerObject = scene.get_sprite_list("Player")[0]
                 while True:
-                    x = playerObject.center_x + random.randint(-500, 500)
-                    y = playerObject.center_y + random.randint(-500, 500)
-                    # POPRAWIĆ
-                    if (not (x > self.width or x < self.width or x < 250 or x > self.width - 250) and not (y > self.height or y < 250)) or arcade.get_distance(x, y, playerObject.center_x, playerObject.center_y) < 300:
-                        break
+                    x = int(playerObject.center_x) + random.randint(-500, 500)
+                    y = int(playerObject.center_y) + random.randint(-500, 500)
+                    if arcade.get_distance(x, y, playerObject.center_x, playerObject.center_y) > 300:
+                        if x in range(1170, 3950) and y in range(1075, 3530):
+                            break
                 scene.add_sprite("Enemies", enemy[0](x, y))
                 if enemy[1] == 0:
                     self.enemies.remove(enemy)

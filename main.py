@@ -12,6 +12,8 @@ SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
 MAP_WIDTH = 3950
 MAP_HEIGHT = 3530
+MAP_START_WIDTH = 1170
+MAP_START_HEIGHT = 1075
 SCREEN_TITLE = "THE GAME"
 CAMERA_SPEED = 0.05  # szybokość z jaką kamera nadąża za graczem od 0 do 1
 
@@ -124,14 +126,24 @@ class GameView(arcade.View):
         time = arcade.Text(
             str(int(self.waveManager.current_wave.time)),
             SCREEN_WIDTH / 2 - 50,
-            SCREEN_HEIGHT - 50,
-            (0, 0, 0, 150),
+            SCREEN_HEIGHT - 125,
+            (0, 0, 0, 200),
             40,
             font_name="First Time Writing!",
             bold=True
         )
 
         time.draw()
+        wave = arcade.Text(
+            f"WAVE: {self.waveManager.current_wave_number}/{self.waveManager.waves_count}",
+            SCREEN_WIDTH / 2 - 150,
+            SCREEN_HEIGHT - 50,
+            (0, 0, 0, 200),
+            40,
+            font_name="First Time Writing!",
+            bold=True
+        )
+        wave.draw()
 
         self.camera.use()
 
@@ -152,7 +164,6 @@ class GameView(arcade.View):
         self.camera.shake(shake_vector, speed=shake_speed, damping=shake_damping)
 
     def on_update(self, delta_time):
-        print(self.playerObject.center_x, self.playerObject.center_y)
         self.physics_engine.step()
         self.enemy_physics_engine.step()
 
@@ -177,7 +188,7 @@ class GameView(arcade.View):
 
         if arcade.key.K in self.playerObject.keys:
             del self.playerObject.keys[arcade.key.K]
-            random.choice(self.scene.get_sprite_list("Enemies")).damage(1)
+            random.choice(self.scene.get_sprite_list("Enemies")).damage(100)
 
 
 def main():
