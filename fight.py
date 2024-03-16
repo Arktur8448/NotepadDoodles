@@ -6,21 +6,30 @@ SCREEN_HEIGHT = 572
 
 
 class Slash(arcade.Sprite):
-    def __init__(self, center_x, center_y):
-        self.frames = [arcade.Texture.create_filled("col", (50, 30), (0, 0, 0, 200)),
-                       arcade.Texture.create_filled("col", (50, 30), (0, 0, 0, 100)),
-                       arcade.Texture.create_filled("col", (50, 30), (0, 0, 0, 200))]
-
-        super().__init__(texture=self.frames[0], center_x=center_x, center_y=center_y)
+    def __init__(self, center_x, center_y, flip=False):
+        self.frames_normal = []
+        for i in range(1, 7):
+            self.frames_normal.append(arcade.load_texture(f"sprites/player/slash/slash_{i}.png"))
+        self.flipped_frames = []
+        for i in range(1, 7):
+            self.flipped_frames.append(arcade.load_texture(f"sprites/player/slash/slash_{i}.png", flipped_horizontally=True))
+        if flip:
+            self.frames = self.flipped_frames
+        else:
+            self.frames = self.frames_normal
+        super().__init__(texture=self.frames[0], center_x=center_x, center_y=center_y, scale=1.5)
+        self.alpha = 150
         self.frames_counter = 1
         self.direction = None
-        self.cooldown_counter = 0.3
+        self.default_cooldown_counter = 0.03
+        self._cooldown_counter = self.default_cooldown_counter
 
     def cooldown(self):
-        self.cooldown_counter -= 1/60
-        if self.cooldown_counter <= 0:
+        self._cooldown_counter -= 1/60
+        if self._cooldown_counter <= 0:
             if self.frames_counter == len(self.frames) - 1:
                 self.kill()
+            self._cooldown_counter = self.default_cooldown_counter
             self.texture = self.frames[self.frames_counter]
             self.frames_counter += 1
 
@@ -48,7 +57,12 @@ def update(gameView):
                 elif e.distance < enemyToDamage.distance:
                     enemyToDamage = e
             if enemyToDamage is not None:
-                gameView.scene.add_sprite("Slash", Slash(enemyToDamage.center_x,enemyToDamage.center_y))
+                if enemyToDamage.direction_move == "Left":
+                    slash = Slash(enemyToDamage.center_x, enemyToDamage.center_y, True)
+                else:
+                    slash = Slash(enemyToDamage.center_x, enemyToDamage.center_y)
+
+                gameView.scene.add_sprite("Slash", slash)
                 enemyToDamage.damage(weapon.damage)
                 weapon.start_cooldown()
 

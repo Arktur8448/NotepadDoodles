@@ -20,7 +20,6 @@ class IndicatorBar:
         self,
         center_x,
         center_y,
-        fullness_sprite: str = "",
         background_sprite: str = "",
         width: int = 100,
         height: int = 4,

@@ -1,13 +1,17 @@
+import math
 import random
 import arcade
+from pyglet.math import Vec2
 import enemies
 import player as pl
 import fight
-import gui
 import characters
+import waves
 
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
+MAP_WIDTH = 3950
+MAP_HEIGHT = 3530
 SCREEN_TITLE = "THE GAME"
 CAMERA_SPEED = 0.05  # szybokość z jaką kamera nadąża za graczem od 0 do 1
 
@@ -47,6 +51,8 @@ class GameView(arcade.View):
 
         self.inventoryView = None
 
+        self.waveManager = None
+
     def setup(self):
         self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.camera.move_to(
@@ -63,15 +69,6 @@ class GameView(arcade.View):
         self.scene.add_sprite_list("Enemies")
         self.scene.add_sprite_list("EnemiesBars")
         self.scene.add_sprite("Player", self.playerObject)
-
-        for i in range(0, 3):
-            self.scene.add_sprite("Enemies", enemies.Slime(self.playerObject.center_x + random.randint(-500, 500),
-                                                           self.playerObject.center_y + random.randint(-500, 500)))
-            self.scene.add_sprite("Enemies", enemies.SlimeMedium(self.playerObject.center_x + random.randint(-500, 500),
-                                                                 self.playerObject.center_y + random.randint(-500,
-                                                                                                             500)))
-            self.scene.add_sprite("Enemies", enemies.SlimeBig(self.playerObject.center_x + random.randint(-500, 500),
-                                                              self.playerObject.center_y + random.randint(-500, 500)))
 
         self.physics_engine = arcade.PymunkPhysicsEngine(damping=0)
         self.physics_engine.add_sprite(self.playerObject,
@@ -90,6 +87,14 @@ class GameView(arcade.View):
 
         arcade.enable_timings()
 
+        self.waveManager = waves.WaveManager(5)
+
+        self.waveManager.get_wave(1).add_enemy(enemies.Slime, 10)
+        self.waveManager.get_wave(2).add_enemy(enemies.SlimeMedium, 10)
+        self.waveManager.get_wave(3).add_enemy(enemies.SlimeBig, 10)
+        self.waveManager.get_wave(4).add_enemy(enemies.Slime, 10)
+        self.waveManager.get_wave(5).add_enemy(enemies.SlimeMedium, 10)
+
     def on_draw(self):
         self.clear()
         self.scene.draw(pixelated=True)
@@ -103,30 +108,56 @@ class GameView(arcade.View):
         self.draw_gui()
         self.playerObject.show_bars()
 
-        # DELETE
-        # texture = arcade.Texture.create_filled("col", (300, 300), (255, 255, 255))
-        # sprite = arcade.Sprite(texture=texture, center_x=self.playerObject.center_x,
-        #                        center_y=self.playerObject.center_y)
-        # sprite.draw()
-
     def draw_gui(self):
         self.gui_camera.use()
+        arcade.load_font("fonts/FirstTimeWriting.ttf")
         fps = arcade.Text(
             str(int(arcade.perf_info.get_fps())),
-            SCREEN_WIDTH - 40,
+            SCREEN_WIDTH - 30,
             SCREEN_HEIGHT - 30,
             (0, 0, 0, 150),
-            20
+            20,
+            font_name="First Time Writing!"
         )
         fps.draw()
+
+        time = arcade.Text(
+            str(int(self.waveManager.current_wave.time)),
+            SCREEN_WIDTH / 2 - 50,
+            SCREEN_HEIGHT - 50,
+            (0, 0, 0, 150),
+            40,
+            font_name="First Time Writing!",
+            bold=True
+        )
+
+        time.draw()
+
         self.camera.use()
 
+    def shake_camera(self, amplitude):
+        shake_direction = random.random() * 2 * math.pi
+        # How 'far' to shake
+        shake_amplitude = amplitude
+        # Calculate a vector based on that
+        shake_vector = Vec2(
+            math.cos(shake_direction) * shake_amplitude,
+            math.sin(shake_direction) * shake_amplitude
+        )
+        # Frequency of the shake
+        shake_speed = 1
+        # How fast to damp the shake
+        shake_damping = 0.9
+        # Do the shake
+        self.camera.shake(shake_vector, speed=shake_speed, damping=shake_damping)
+
     def on_update(self, delta_time):
+        print(self.playerObject.center_x, self.playerObject.center_y)
         self.physics_engine.step()
         self.enemy_physics_engine.step()
 
         self.playerObject.movement(self.camera, CAMERA_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT, self.physics_engine)
-        self.playerObject.update_player(self.physics_engine, self.scene)
+        self.playerObject.update_player(self)
 
         for e in self.scene.get_sprite_list("Enemies"):
             try:
@@ -138,6 +169,8 @@ class GameView(arcade.View):
                                                           moment_of_intertia=1000000)
 
         fight.update(self)
+
+        self.waveManager.update(self.scene)
 
         if arcade.key.ESCAPE in self.playerObject.keys:
             arcade.exit()

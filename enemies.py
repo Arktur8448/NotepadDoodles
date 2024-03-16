@@ -104,6 +104,10 @@ class Enemy(arcade.Sprite):
 
         move_to_player()
 
+        if self.collides_with_sprite(playerObject):
+            if self.canAttack and not playerObject.isDashing:
+                self.attack_player(playerObject)
+
         def _update_animation(delta_time: float = 1 / 60):
             if self.ifAttack:
                 self._cur_texture = 0
@@ -146,7 +150,7 @@ class Enemy(arcade.Sprite):
     def attack_player(self, playerObject):
         self.canAttack = False
         self._attack_cooldown_counter = self.attack_cooldown
-        playerObject.hp -= self.attack_damage
+        playerObject.damage(self.attack_damage)
 
     def die(self):
         self.die_effect()
@@ -157,8 +161,7 @@ class Enemy(arcade.Sprite):
 
     def show_hp(self):
         if self.hp != self.max_hp:
-            hp_bar = gui.IndicatorBar(self.center_x, self.center_y - 70 * self.modify_bar_pos_y,
-                                      "sprites/gui/bars/bar_full.png", "sprites/gui/bars/Bar.png",
+            hp_bar = gui.IndicatorBar(self.center_x, self.center_y - 70 * self.modify_bar_pos_y, "sprites/gui/bars/Bar.png",
                                       100 * self.modify_bar_scale, 16 * self.modify_bar_scale, 2 * self.modify_bar_scale)
             hp_bar.fullness = self.hp / self.max_hp
             hp_bar.draw()

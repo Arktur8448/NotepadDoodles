@@ -1,3 +1,6 @@
+import math
+import random
+
 import arcade
 import time
 from pyglet.math import Vec2
@@ -67,8 +70,12 @@ class Player(arcade.Sprite):
         self.sprint_time_interval = 0.3
         self.walk_time_interval = 0.5
 
-        self.weapons = [items.Weapon("sprites/player/slash.png", "TOPÓR", damage=10, speed=2, attack_range=1),
-                        items.Weapon("sprites/player/slash.png", "TOPÓR2", damage=2, speed=0.5, attack_range=0.75)]
+        self.weapons = [items.Weapon("sprites/gui/bars/Bar.png", "TOPÓR", damage=10, speed=2, attack_range=1),
+                        items.Weapon("sprites/gui/bars/Bar.png", "Dagger", damage=2, speed=0.5, attack_range=0.75)]
+
+        self.coins = 0
+
+        self.gameView = None
 
         self._setup_character()
 
@@ -164,11 +171,13 @@ class Player(arcade.Sprite):
 
         if self.can_move:
             check_move_key()
-        if self.moving:
+        if self.moving or self.isDashing:
             move_camera_to_player(camera_speed)
 
-    def update_player(self, physics_engine, scene):
+    def update_player(self, gameView):
         self.character.character_skills(self)
+        self.gameView = gameView
+        physics_engine = gameView.physics_engine
 
         if self.can_regen_hp:
             self.hp += DELTA_TIME * self.hp_regen_rate
@@ -237,16 +246,9 @@ class Player(arcade.Sprite):
 
         _update_animation()
 
-        collision_with_enemies = self.collides_with_list(scene.get_sprite_list("Enemies"))
-
-        for e in collision_with_enemies:
-            if e.canAttack and not self.isDashing:
-                e.attack_player(self)
-
     def show_bars(self):
         if self.stamina != self.max_stamina and not self.max_stamina == 0 and not self.stamina < 0:
-            stamina_bar = gui.IndicatorBar(self.center_x, self.center_y + 70,
-                                           "sprites/gui/bars/bar_full.png", "sprites/gui/bars/Bar.png", 80, 14, 2)
+            stamina_bar = gui.IndicatorBar(self.center_x, self.center_y + 70, "sprites/gui/bars/Bar.png", 80, 14, 2)
             stamina_bar.fullness = self.stamina / self.max_stamina
             stamina_bar.draw()
             piorun = arcade.Sprite("sprites/gui/bars/Piorun.png", scale=0.5)
@@ -260,12 +262,12 @@ class Player(arcade.Sprite):
                 arcade.color.BLACK,
                 10,
                 anchor_x="center",
+                font_name="First Time Writing!",
                 bold=True
             )
             stamina.draw()
         elif self.stamina < 0:
-            stamina_bar = gui.IndicatorBar(self.center_x, self.center_y + 70,
-                                           "sprites/gui/bars/bar_full.png", "sprites/gui/bars/Bar.png", 80, 14, 2)
+            stamina_bar = gui.IndicatorBar(self.center_x, self.center_y + 70, "sprites/gui/bars/Bar.png", 80, 14, 2)
             stamina_bar.fullness = 0
             stamina_bar.draw()
             piorun = arcade.Sprite("sprites/gui/bars/Piorun.png", scale=0.5)
@@ -279,12 +281,12 @@ class Player(arcade.Sprite):
                 arcade.color.BLACK,
                 10,
                 anchor_x="center",
+                font_name="First Time Writing!",
                 bold=True
             )
             stamina.draw()
         if self.hp != self.max_hp:
-            hp_bar = gui.IndicatorBar(self.center_x, self.center_y - 70,
-                                      "sprites/gui/bars/bar_full.png", "sprites/gui/bars/Bar.png", 100, 16, 2)
+            hp_bar = gui.IndicatorBar(self.center_x, self.center_y - 70,"sprites/gui/bars/Bar.png", 100, 16, 2)
             hp_bar.fullness = self.hp / self.max_hp
             hp_bar.draw()
             heart = arcade.Sprite("sprites/gui/bars/Heart.png", scale=0.5)
@@ -298,6 +300,7 @@ class Player(arcade.Sprite):
                 arcade.color.BLACK,
                 10,
                 anchor_x="center",
+                font_name="First Time Writing!",
                 bold=True
             )
             hp.draw()
@@ -331,6 +334,7 @@ class Player(arcade.Sprite):
                 self.move.append(arcade.load_texture(f"sprites/player/stickman/player_walk_{i}.png"))
         self.move_animation_count = len(self.move)
 
-    def damage(self,hp):
+    def damage(self, hp):
         self.hp -= hp
         self.playHitAnimation = True
+        self.gameView.shake_camera(2)
