@@ -6,7 +6,7 @@ SCREEN_HEIGHT = 572
 
 
 class Slash(arcade.Sprite):
-    def __init__(self, center_x, center_y, flip=False):
+    def __init__(self, center_x, center_y, scale=1, flip=False):
         self.frames_normal = []
         for i in range(1, 7):
             self.frames_normal.append(arcade.load_texture(f"sprites/player/slash/slash_{i}.png"))
@@ -17,7 +17,7 @@ class Slash(arcade.Sprite):
             self.frames = self.flipped_frames
         else:
             self.frames = self.frames_normal
-        super().__init__(texture=self.frames[0], center_x=center_x, center_y=center_y, scale=1.5)
+        super().__init__(texture=self.frames[0], center_x=center_x, center_y=center_y, scale=scale)
         self.alpha = 150
         self.frames_counter = 1
         self.direction = None
@@ -58,12 +58,12 @@ def update(gameView):
                     enemyToDamage = e
             if enemyToDamage is not None:
                 if enemyToDamage.direction_move == "Left":
-                    slash = Slash(enemyToDamage.center_x, enemyToDamage.center_y, True)
+                    slash = Slash(enemyToDamage.center_x, enemyToDamage.center_y, weapon.slash_scale, True)
                 else:
-                    slash = Slash(enemyToDamage.center_x, enemyToDamage.center_y)
+                    slash = Slash(enemyToDamage.center_x, enemyToDamage.center_y, weapon.slash_scale)
 
                 gameView.scene.add_sprite("Slash", slash)
-                enemyToDamage.damage(weapon.damage)
+                enemyToDamage.damage(weapon.damage * (playerObject.strength / 100))
                 weapon.start_cooldown()
 
 

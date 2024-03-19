@@ -1,15 +1,23 @@
 import random
 import arcade
 
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
+DEFAULT_COOLDOWN = 3
+
 
 class WaveManager:
-    def __init__(self, waves_count):
+    def __init__(self, waves_count, spawn_cooldown_change=0.25):
         self.waves_count = waves_count
         self.waves = [None]
         for i in range(0, waves_count):
-            self.waves.append(Wave())
+            cooldown = DEFAULT_COOLDOWN - i * spawn_cooldown_change
+            if cooldown < 0:
+                cooldown = 0.5
+            self.waves.append(Wave(cooldown))
         self.current_wave = self.waves[1]
         self.current_wave_number = 1
+        self.spawn_cooldown_change = spawn_cooldown_change
 
     def get_wave(self, number):
         return self.waves[number]
@@ -20,46 +28,101 @@ class WaveManager:
             self.current_wave_number += 1
             self.current_wave = self.waves[self.current_wave_number]
 
+    def draw_wave_status(self):
+        time = arcade.Text(
+            str(int(self.current_wave.time)),
+            SCREEN_WIDTH / 2 - 50,
+            SCREEN_HEIGHT - 125,
+            (0, 0, 0, 200),
+            40,
+            font_name="First Time Writing!",
+            bold=True
+        )
+
+        time.draw()
+        wave = arcade.Text(
+            f"WAVE: {self.current_wave_number}/{self.waves_count}",
+            SCREEN_WIDTH / 2 - 150,
+            SCREEN_HEIGHT - 50,
+            (0, 0, 0, 200),
+            40,
+            font_name="First Time Writing!",
+            bold=True
+        )
+        wave.draw()
+
 
 class Wave:
-    def __init__(self):
+    def __init__(self, cooldown_spawn):
         self.time = 120
         self.enemies = []
-        self._default_enemy_cooldown_spawner = 0.5
+        self._default_enemy_cooldown_spawner = cooldown_spawn
         self._enemy_cooldown_spawner = 0
         self.completed = False
 
-    def add_enemy(self, enemy, amount):
-        self.enemies.append([enemy, amount])
+    def add_enemy(self, enemy):
+        self.enemies.append(enemy)
 
     def update(self, scene):
         if not self.completed:
             self.time -= 1 / 60
-            if self.time <= 0 or (len(self.enemies) == 0 and len(scene.get_sprite_list("Enemies")) == 0):
+            if self.time <= 0 or len(self.enemies) == 0:
                 self.end_wave(scene)
 
             self._enemy_cooldown_spawner -= 1 / 60
-            if self._enemy_cooldown_spawner <= 0 and not (len(self.enemies) == 0):
+            if self._enemy_cooldown_spawner <= 0:
                 self._enemy_cooldown_spawner = self._default_enemy_cooldown_spawner
                 enemy = random.choice(self.enemies)
-                enemy[1] -= 1
                 playerObject = scene.get_sprite_list("Player")[0]
-                while True:
-                    x = int(playerObject.center_x) + random.randint(-500, 500)
-                    y = int(playerObject.center_y) + random.randint(-500, 500)
-                    if arcade.get_distance(x, y, playerObject.center_x, playerObject.center_y) > 300:
-                        if x in range(1170, 3950) and y in range(1075, 3530):
-                            break
-                scene.add_sprite("Enemies", enemy[0](x, y))
-                if enemy[1] == 0:
-                    self.enemies.remove(enemy)
+
+                min_monster_distance = 150
+                max_monster_distance = 400
+                if playerObject.direction_move == "Left":
+                    monster_x_offset = -random.randint(min_monster_distance, max_monster_distance)
+                    monster_y_offset = 0
+                elif playerObject.direction_move == "Right":
+                    monster_x_offset = random.randint(min_monster_distance, max_monster_distance)
+                    monster_y_offset = 0
+                elif playerObject.direction_move == "Up":
+                    monster_x_offset = 0
+                    monster_y_offset = random.randint(min_monster_distance, max_monster_distance)
+                elif playerObject.direction_move == "UpRight":
+                    monster_x_offset = random.randint(min_monster_distance, max_monster_distance)
+                    monster_y_offset = random.randint(min_monster_distance, max_monster_distance)
+                elif playerObject.direction_move == "UpLeft":
+                    monster_x_offset = -random.randint(min_monster_distance, max_monster_distance)
+                    monster_y_offset = random.randint(min_monster_distance, max_monster_distance)
+
+                elif playerObject.direction_move == "Down":
+                    monster_x_offset = 0
+                    monster_y_offset = -random.randint(min_monster_distance, max_monster_distance)
+                elif playerObject.direction_move == "DownRight":
+                    monster_x_offset = random.randint(min_monster_distance, max_monster_distance)
+                    monster_y_offset = -random.randint(min_monster_distance, max_monster_distance)
+                elif playerObject.direction_move == "DownLeft":
+                    monster_x_offset = -random.randint(min_monster_distance, max_monster_distance)
+                    monster_y_offset = -random.randint(min_monster_distance, max_monster_distance)
+
+                else:
+                    monster_x_offset = random.randint(min_monster_distance, max_monster_distance)
+                    monster_y_offset = random.randint(min_monster_distance, max_monster_distance)
+
+                x = int(playerObject.center_x) + monster_x_offset
+                y = int(playerObject.center_y) + monster_y_offset
+                if not (x in range(1170, 3950)):
+                    if x > 3950:
+                        x = 3900
+                    else:
+                        x = 1180
+                if not (y in range(1075, 3530)):
+                    if y > 3530:
+                        y = 3500
+                    else:
+                        y = 1050
+                scene.add_sprite("Enemies", enemy(x, y))
 
     def end_wave(self, scene):
-        playerObject = scene.get_sprite_list("Player")[0]
         enemies = scene.get_sprite_list("Enemies")
         for e in enemies:
-            playerObject.coins += e.coin_drop
             e.kill()
-        for e in self.enemies:
-            playerObject.coins += e.coin_drop
         self.completed = True

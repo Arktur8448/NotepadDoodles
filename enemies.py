@@ -1,9 +1,12 @@
+import random
+
 import arcade
 import gui
+import misc
 
 
 class Enemy(arcade.Sprite):
-    def __init__(self, name, pos_x, pos_y, coin_drop=0, hp=1, defence=1, dodge=1, move_speed=1.0, attack_damage=1, attack_cooldown=1, drop=None):
+    def __init__(self, name, pos_x, pos_y, min_coin_drop=0, max_coin_drop=0, hp=1, defence=1, dodge=1, move_speed=1.0, attack_damage=1, attack_cooldown=1, drop=None):
         super().__init__(filename=f"sprites/enemies/{name.lower()}/{name.lower()}_base.png", center_x=pos_x,
                          center_y=pos_y, scale=1)
         self.name = name
@@ -15,7 +18,7 @@ class Enemy(arcade.Sprite):
         self.dodge = dodge
         self.move_speed = move_speed * 3000
 
-        self.coin_drop = coin_drop
+        self.coin_drop = random.randint(min_coin_drop, max_coin_drop)
         self.drop = drop if drop else []
 
         self._load_textures()
@@ -141,7 +144,7 @@ class Enemy(arcade.Sprite):
         _update_animation()
 
         if self.hp <= 0:
-            self.die()
+            self.die(scene)
 
     def damage(self, hp):
         self.hp -= hp
@@ -152,8 +155,24 @@ class Enemy(arcade.Sprite):
         self._attack_cooldown_counter = self.attack_cooldown
         playerObject.damage(self.attack_damage)
 
-    def die(self):
+    def die(self, scene):
         self.die_effect()
+        while self.coin_drop > 0:
+            if self.coin_drop - 50 >= 0:
+                scene.add_sprite("Coins", misc.Coin(50, self.center_x, self.center_y))
+                self.coin_drop -= 50
+            elif self.coin_drop - 20 >= 0:
+                scene.add_sprite("Coins", misc.Coin(20, self.center_x, self.center_y))
+                self.coin_drop -= 20
+            elif self.coin_drop - 10 >= 0:
+                scene.add_sprite("Coins", misc.Coin(10, self.center_x, self.center_y))
+                self.coin_drop -= 10
+            elif self.coin_drop - 5 >= 0:
+                scene.add_sprite("Coins", misc.Coin(5, self.center_x, self.center_y))
+                self.coin_drop -= 5
+            elif self.coin_drop - 1 >= 0:
+                scene.add_sprite("Coins", misc.Coin(1, self.center_x, self.center_y))
+                self.coin_drop -= 1
         self.kill()
 
     def die_effect(self):
@@ -169,7 +188,7 @@ class Enemy(arcade.Sprite):
 
 class Slime(Enemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, coin_drop=5, hp=5, defence=0, dodge=10, move_speed=2,
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=4, max_coin_drop=5, hp=5, defence=0, dodge=10, move_speed=2,
                          attack_damage=2)
         self.name = "Slime"
         self.move_time_interval = 0.2
@@ -179,7 +198,7 @@ class Slime(Enemy):
 
 class SlimeMedium(Enemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, coin_drop=10, hp=10, defence=1, dodge=5,
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10, defence=10, dodge=5,
                          move_speed=1.5,
                          attack_damage=7)
         self.name = "Slime"
@@ -193,7 +212,7 @@ class SlimeMedium(Enemy):
 
 class SlimeBig(Enemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, coin_drop=20, hp=30, defence=2, dodge=3,
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=15, max_coin_drop=20, hp=30, defence=20, dodge=3,
                          move_speed=1,
                          attack_damage=15)
         self.name = "Slime"

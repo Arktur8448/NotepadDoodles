@@ -70,6 +70,7 @@ class GameView(arcade.View):
         self.scene.add_sprite_list("Slash")
         self.scene.add_sprite_list("Enemies")
         self.scene.add_sprite_list("EnemiesBars")
+        self.scene.add_sprite_list("Coins")
         self.scene.add_sprite("Player", self.playerObject)
 
         self.physics_engine = arcade.PymunkPhysicsEngine(damping=0)
@@ -91,11 +92,19 @@ class GameView(arcade.View):
 
         self.waveManager = waves.WaveManager(5)
 
-        self.waveManager.get_wave(1).add_enemy(enemies.Slime, 10)
-        self.waveManager.get_wave(2).add_enemy(enemies.SlimeMedium, 10)
-        self.waveManager.get_wave(3).add_enemy(enemies.SlimeBig, 10)
-        self.waveManager.get_wave(4).add_enemy(enemies.Slime, 10)
-        self.waveManager.get_wave(5).add_enemy(enemies.SlimeMedium, 10)
+        self.waveManager.get_wave(1).add_enemy(enemies.Slime)
+
+        self.waveManager.get_wave(2).add_enemy(enemies.Slime)
+        self.waveManager.get_wave(2).add_enemy(enemies.SlimeMedium)
+
+        self.waveManager.get_wave(3).add_enemy(enemies.Slime)
+        self.waveManager.get_wave(3).add_enemy(enemies.SlimeMedium)
+        self.waveManager.get_wave(3).add_enemy(enemies.SlimeBig)
+
+        self.waveManager.get_wave(4).add_enemy(enemies.SlimeMedium)
+        self.waveManager.get_wave(4).add_enemy(enemies.SlimeBig)
+
+        self.waveManager.get_wave(5).add_enemy(enemies.SlimeBig)
 
     def on_draw(self):
         self.clear()
@@ -114,8 +123,8 @@ class GameView(arcade.View):
         self.gui_camera.use()
         arcade.load_font("fonts/FirstTimeWriting.ttf")
         fps = arcade.Text(
-            str(int(arcade.perf_info.get_fps())),
-            SCREEN_WIDTH - 30,
+            f"FPS:{int(arcade.perf_info.get_fps())}",
+            SCREEN_WIDTH - 80,
             SCREEN_HEIGHT - 30,
             (0, 0, 0, 150),
             20,
@@ -123,27 +132,22 @@ class GameView(arcade.View):
         )
         fps.draw()
 
-        time = arcade.Text(
-            str(int(self.waveManager.current_wave.time)),
-            SCREEN_WIDTH / 2 - 50,
-            SCREEN_HEIGHT - 125,
-            (0, 0, 0, 200),
-            40,
-            font_name="First Time Writing!",
-            bold=True
-        )
-
-        time.draw()
-        wave = arcade.Text(
-            f"WAVE: {self.waveManager.current_wave_number}/{self.waveManager.waves_count}",
-            SCREEN_WIDTH / 2 - 150,
+        coins = arcade.Text(
+            f"{self.playerObject.coins}",
+            20,
             SCREEN_HEIGHT - 50,
-            (0, 0, 0, 200),
-            40,
+            (0, 0, 0, 255),
+            30,
             font_name="First Time Writing!",
             bold=True
         )
-        wave.draw()
+        counter = len(str(self.playerObject.coins))
+        coin_image = arcade.Sprite("sprites/coin.png", center_x=60 + (20 * counter), center_y=SCREEN_HEIGHT - 35, scale=0.8)
+
+        coins.draw()
+        coin_image.draw()
+
+        self.waveManager.draw_wave_status()
 
         self.camera.use()
 
@@ -178,21 +182,23 @@ class GameView(arcade.View):
                 self.enemy_physics_engine.add_sprite_list(self.scene.get_sprite_list("Enemies"),
                                                           collision_type="Enemies",
                                                           moment_of_intertia=1000000)
+        for c in self.scene.get_sprite_list("Coins"):
+            c.move(self.playerObject)
 
         fight.update(self)
 
         self.waveManager.update(self.scene)
 
-        if arcade.key.ESCAPE in self.playerObject.keys:
-            arcade.exit()
-
         if arcade.key.K in self.playerObject.keys:
             del self.playerObject.keys[arcade.key.K]
             random.choice(self.scene.get_sprite_list("Enemies")).damage(100)
+        if arcade.key.L in self.playerObject.keys:
+            del self.playerObject.keys[arcade.key.L]
+            self.waveManager.current_wave.completed = True
 
 
 def main():
-    player_object = pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2, characters.Wizard())
+    player_object = pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2, characters.StickMan())
     window = GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, player_object)
     start_view = GameView(player_object)
     window.show_view(start_view)
