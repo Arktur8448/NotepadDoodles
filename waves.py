@@ -17,7 +17,6 @@ class WaveManager:
             self.waves.append(Wave(cooldown))
         self.current_wave = self.waves[1]
         self.current_wave_number = 1
-        self.spawn_cooldown_change = spawn_cooldown_change
 
     def get_wave(self, number):
         return self.waves[number]
@@ -71,7 +70,7 @@ class Wave:
 
             self._enemy_cooldown_spawner -= 1 / 60
             if self._enemy_cooldown_spawner <= 0:
-                self._enemy_cooldown_spawner = self._default_enemy_cooldown_spawner
+                self._enemy_cooldown_spawner = random.randint(self._default_enemy_cooldown_spawner/2 * 10000, self._default_enemy_cooldown_spawner * 10000) / 10000
                 enemy = random.choice(self.enemies)
                 playerObject = scene.get_sprite_list("Player")[0]
 
