@@ -24,8 +24,11 @@ class WaveManager:
     def update(self, scene):
         self.current_wave.update(scene)
         if self.current_wave.completed:
-            self.current_wave_number += 1
-            self.current_wave = self.waves[self.current_wave_number]
+            try:
+                self.current_wave_number += 1
+                self.current_wave = self.waves[self.current_wave_number]
+            except:
+                arcade.exit()
 
     def draw_wave_status(self):
         time = arcade.Text(
@@ -76,14 +79,15 @@ class Wave:
 
                 min_monster_distance = 150
                 max_monster_distance = 400
+                margin = 200
                 if playerObject.direction_move == "Left":
                     monster_x_offset = -random.randint(min_monster_distance, max_monster_distance)
-                    monster_y_offset = 0
+                    monster_y_offset = random.randint(-margin, margin)
                 elif playerObject.direction_move == "Right":
                     monster_x_offset = random.randint(min_monster_distance, max_monster_distance)
-                    monster_y_offset = 0
+                    monster_y_offset = random.randint(-margin, margin)
                 elif playerObject.direction_move == "Up":
-                    monster_x_offset = 0
+                    monster_x_offset = random.randint(-margin, margin)
                     monster_y_offset = random.randint(min_monster_distance, max_monster_distance)
                 elif playerObject.direction_move == "UpRight":
                     monster_x_offset = random.randint(min_monster_distance, max_monster_distance)
@@ -93,7 +97,7 @@ class Wave:
                     monster_y_offset = random.randint(min_monster_distance, max_monster_distance)
 
                 elif playerObject.direction_move == "Down":
-                    monster_x_offset = 0
+                    monster_x_offset = random.randint(-margin, margin)
                     monster_y_offset = -random.randint(min_monster_distance, max_monster_distance)
                 elif playerObject.direction_move == "DownRight":
                     monster_x_offset = random.randint(min_monster_distance, max_monster_distance)

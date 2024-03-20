@@ -40,7 +40,7 @@ class Enemy(arcade.Sprite):
         self.scene = None
 
         self._time_move_counter = -1
-        self._optimization_time = 2
+        self._optimization_time = 5
         self._move_force = (0, 0)
 
         self.distance = None

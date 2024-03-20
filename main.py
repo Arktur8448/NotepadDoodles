@@ -87,6 +87,9 @@ class GameView(arcade.View):
         self.enemy_physics_engine.add_sprite_list(self.scene.get_sprite_list("Enemies"),
                                                   collision_type="Enemies",
                                                   moment_of_intertia=1000000)
+        self.enemy_physics_engine.add_sprite_list(self.scene.get_sprite_list("collision"),
+                                                  collision_type="wall",
+                                                  body_type=arcade.PymunkPhysicsEngine.STATIC)
 
         arcade.enable_timings()
 
@@ -142,7 +145,8 @@ class GameView(arcade.View):
             bold=True
         )
         counter = len(str(self.playerObject.coins))
-        coin_image = arcade.Sprite("sprites/coin.png", center_x=60 + (20 * counter), center_y=SCREEN_HEIGHT - 35, scale=0.8)
+        coin_image = arcade.Sprite("sprites/coin.png", center_x=60 + (20 * counter), center_y=SCREEN_HEIGHT - 35,
+                                   scale=0.8)
 
         coins.draw()
         coin_image.draw()
@@ -182,6 +186,9 @@ class GameView(arcade.View):
                 self.enemy_physics_engine.add_sprite_list(self.scene.get_sprite_list("Enemies"),
                                                           collision_type="Enemies",
                                                           moment_of_intertia=1000000)
+                self.enemy_physics_engine.add_sprite_list(self.scene.get_sprite_list("collision"),
+                                                          collision_type="wall",
+                                                          body_type=arcade.PymunkPhysicsEngine.STATIC)
         for c in self.scene.get_sprite_list("Coins"):
             c.move(self.playerObject)
 
@@ -198,7 +205,7 @@ class GameView(arcade.View):
 
 
 def main():
-    player_object = pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2, characters.StickMan())
+    player_object = pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2, characters.Wizard())
     window = GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, player_object)
     start_view = GameView(player_object)
     window.show_view(start_view)
