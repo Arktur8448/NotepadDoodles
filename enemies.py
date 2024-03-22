@@ -1,5 +1,4 @@
 import random
-
 import arcade
 import gui
 import misc

@@ -1,8 +1,7 @@
 import random
 import arcade
 
-SCREEN_WIDTH = 1920
-SCREEN_HEIGHT = 1080
+SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 DEFAULT_COOLDOWN = 3
 
 

@@ -1,9 +1,5 @@
 import arcade
 
-MOUSE_MARGIN = 40
-SCREEN_WIDTH = 992
-SCREEN_HEIGHT = 572
-
 
 class Slash(arcade.Sprite):
     def __init__(self, center_x, center_y, scale=1, flip=False):

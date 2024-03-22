@@ -8,8 +8,7 @@ import fight
 import characters
 import waves
 
-SCREEN_WIDTH = 1920
-SCREEN_HEIGHT = 1080
+SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 MAP_WIDTH = 3950
 MAP_HEIGHT = 3530
 MAP_START_WIDTH = 1170
@@ -20,7 +19,7 @@ CAMERA_SPEED = 0.05  # szybokość z jaką kamera nadąża za graczem od 0 do 1
 
 class GameWindow(arcade.Window):
     def __init__(self, width, height, title, player_object):
-        super().__init__(width, height, title, fullscreen=True)
+        super().__init__(width, height, title, fullscreen=True, antialiasing=True)
         self.set_vsync(True)
         self.playerObject = player_object
 
@@ -32,6 +31,8 @@ class GameWindow(arcade.Window):
             del self.playerObject.keys[key]
         except:
             pass
+        if key == arcade.key.O:
+            print(arcade.get_scaling_factor(self))
 
 
 class GameView(arcade.View):
@@ -205,7 +206,7 @@ class GameView(arcade.View):
 
 
 def main():
-    player_object = pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2, characters.Wizard())
+    player_object = pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2, characters.StickMan())
     window = GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, player_object)
     start_view = GameView(player_object)
     window.show_view(start_view)
