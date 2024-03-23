@@ -7,6 +7,7 @@ import player as pl
 import fight
 import characters
 import waves
+import arcade.gui
 
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 MAP_WIDTH = 3950
@@ -15,6 +16,7 @@ MAP_START_WIDTH = 1170
 MAP_START_HEIGHT = 1075
 SCREEN_TITLE = "THE GAME"
 CAMERA_SPEED = 0.05  # szybokość z jaką kamera nadąża za graczem od 0 do 1
+BG_COLOR = (248, 245, 226)
 
 
 class GameWindow(arcade.Window):
@@ -22,6 +24,7 @@ class GameWindow(arcade.Window):
         super().__init__(width, height, title, fullscreen=True, antialiasing=True)
         self.set_vsync(True)
         self.playerObject = player_object
+        arcade.load_font("fonts/FirstTimeWriting.ttf")
 
     def on_key_press(self, key, key_modifiers):
         self.playerObject.keys[key] = True
@@ -125,7 +128,6 @@ class GameView(arcade.View):
 
     def draw_gui(self):
         self.gui_camera.use()
-        arcade.load_font("fonts/FirstTimeWriting.ttf")
         fps = arcade.Text(
             f"FPS:{int(arcade.perf_info.get_fps())}",
             SCREEN_WIDTH - 80,
@@ -203,6 +205,98 @@ class GameView(arcade.View):
         if arcade.key.L in self.playerObject.keys:
             del self.playerObject.keys[arcade.key.L]
             self.waveManager.current_wave.completed = True
+        if arcade.key.ESCAPE in self.playerObject.keys:
+            del self.playerObject.keys[arcade.key.ESCAPE]
+            self.window.show_view(PauseView(self))
+
+
+class PauseView(arcade.View):
+    def __init__(self, game_view):
+        super().__init__()
+        self.camera = None
+        self.bg_camera = None
+        self.game_view = game_view
+
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+        style = {
+            "font_name": "First Time Writing!",
+            "font_size": 15,
+            "font_color": arcade.color.BLACK,
+            "border_width": 2,
+            "border_color": None,
+            "bg_color": (248 - 20, 245 - 20, 226 - 20),
+
+            # used if button is pressed
+            "bg_color_pressed": BG_COLOR,
+            "border_color_pressed": arcade.color.BLACK,  # also used when hovered
+            "font_color_pressed": arcade.color.GRAY,
+        }
+
+        self.v_box = arcade.gui.UIBoxLayout()
+
+        resume_button = arcade.gui.UIFlatButton(text="Resume", width=400, height=80, style=style)
+        self.v_box.add(resume_button.with_space_around(bottom=100))
+        resume_button.on_click = self.un_pause
+
+        settings_button = arcade.gui.UIFlatButton(text="Settings", width=400, height=80, style=style)
+        self.v_box.add(settings_button.with_space_around(bottom=100))
+
+        main_menu_button = arcade.gui.UIFlatButton(text="Quit To Main Menu", width=400, height=80, style=style)
+        self.v_box.add(main_menu_button.with_space_around(bottom=100))
+        main_menu_button.on_click = self.main_menu
+
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="center_x",
+                anchor_y="top",
+                align_y=-350,
+                child=self.v_box)
+        )
+
+    def on_show_view(self):
+        arcade.set_background_color(arcade.color.BLACK)
+        self.bg_camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.bg_camera.move_to(
+            (self.game_view.playerObject.center_x - (SCREEN_WIDTH / 2),
+             self.game_view.playerObject.center_y - (SCREEN_HEIGHT / 2)), 1)
+        self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
+
+    def on_draw(self):
+        self.clear()
+        self.bg_camera.use()
+        self.game_view.scene.draw()
+        self.game_view.draw_gui()
+
+        self.camera.use()
+        arcade.draw_rectangle_filled(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT, (0, 0, 0, 150))
+        lines = arcade.load_texture("maps/notepad/Lines.png")
+        for r in range(0, int(SCREEN_HEIGHT / 1.25 / 32)):
+            for c in range(0, int(SCREEN_WIDTH / 4 / 32)):
+                arcade.draw_texture_rectangle(SCREEN_WIDTH / 2.61 + 32 * c, SCREEN_HEIGHT - 100 - 32 * r, 32, 32, lines)
+        pause = arcade.Text(
+            f"PAUSE",
+            SCREEN_WIDTH / 2,
+            SCREEN_HEIGHT - 200,
+            (0, 0, 0, 255),
+            80,
+            font_name="First Time Writing!",
+            anchor_x="center",
+        )
+        pause.draw()
+        self.manager.draw()
+        self.bg_camera.use()
+
+    def on_update(self, delta_time):
+        if arcade.key.ESCAPE in self.game_view.playerObject.keys:
+            del self.game_view.playerObject.keys[arcade.key.ESCAPE]
+            self.un_pause()
+
+    def un_pause(self, event=None):
+        self.window.show_view(self.game_view)
+
+    def main_menu(self, event=None):
+        arcade.exit()
 
 
 def main():
