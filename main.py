@@ -8,6 +8,7 @@ import fight
 import characters
 import waves
 import arcade.gui
+import gui
 
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 MAP_WIDTH = 3950
@@ -213,6 +214,7 @@ class GameView(arcade.View):
 class PauseView(arcade.View):
     def __init__(self, game_view):
         super().__init__()
+        self.scene = None
         self.camera = None
         self.bg_camera = None
         self.game_view = game_view
@@ -235,14 +237,14 @@ class PauseView(arcade.View):
 
         self.v_box = arcade.gui.UIBoxLayout()
 
-        resume_button = arcade.gui.UIFlatButton(text="Resume", width=400, height=80, style=style)
+        resume_button = gui.Button(width=400, height=80, text="Resume")
         self.v_box.add(resume_button.with_space_around(bottom=100))
         resume_button.on_click = self.un_pause
 
-        settings_button = arcade.gui.UIFlatButton(text="Settings", width=400, height=80, style=style)
+        settings_button = gui.Button(width=400, height=80, text="Settings")
         self.v_box.add(settings_button.with_space_around(bottom=100))
 
-        main_menu_button = arcade.gui.UIFlatButton(text="Quit To Main Menu", width=400, height=80, style=style)
+        main_menu_button = gui.Button(width=400, height=80, text="Quit To Main Menu")
         self.v_box.add(main_menu_button.with_space_around(bottom=100))
         main_menu_button.on_click = self.main_menu
 
@@ -262,6 +264,14 @@ class PauseView(arcade.View):
              self.game_view.playerObject.center_y - (SCREEN_HEIGHT / 2)), 1)
         self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
 
+        self.scene = arcade.Scene()
+
+        self.scene.add_sprite_list("BG")
+        lines = arcade.load_texture("maps/notepad/Lines.png")
+        for r in range(0, int(SCREEN_HEIGHT / 1.25 / 32)):
+            for c in range(0, int(SCREEN_WIDTH / 4 / 32)):
+                self.scene.add_sprite("BG", arcade.Sprite(center_x=SCREEN_WIDTH / 2.61 + 32 * c, center_y=SCREEN_HEIGHT - 100 - 32 * r, image_width=32, image_height=32, texture=lines))
+
     def on_draw(self):
         self.clear()
         self.bg_camera.use()
@@ -270,10 +280,9 @@ class PauseView(arcade.View):
 
         self.camera.use()
         arcade.draw_rectangle_filled(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT, (0, 0, 0, 150))
-        lines = arcade.load_texture("maps/notepad/Lines.png")
-        for r in range(0, int(SCREEN_HEIGHT / 1.25 / 32)):
-            for c in range(0, int(SCREEN_WIDTH / 4 / 32)):
-                arcade.draw_texture_rectangle(SCREEN_WIDTH / 2.61 + 32 * c, SCREEN_HEIGHT - 100 - 32 * r, 32, 32, lines)
+
+        self.scene.draw()
+
         pause = arcade.Text(
             f"PAUSE",
             SCREEN_WIDTH / 2,
@@ -284,6 +293,7 @@ class PauseView(arcade.View):
             anchor_x="center",
         )
         pause.draw()
+
         self.manager.draw()
         self.bg_camera.use()
 

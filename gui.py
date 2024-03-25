@@ -1,4 +1,5 @@
 import arcade
+import arcade.gui
 from typing import Tuple
 
 
@@ -17,13 +18,13 @@ class IndicatorBar:
     """
 
     def __init__(
-        self,
-        center_x,
-        center_y,
-        background_sprite: str = "",
-        width: int = 100,
-        height: int = 4,
-        border_size: int = 4,
+            self,
+            center_x,
+            center_y,
+            background_sprite: str = "",
+            width: int = 100,
+            height: int = 4,
+            border_size: int = 4,
     ) -> None:
         # Set the needed size variables
         self._box_width: int = width
@@ -42,9 +43,11 @@ class IndicatorBar:
         self.fullness: float = 1.0
 
     def draw(self):
-        self._background_box.draw_sized(self.center_x, self.center_y, self._box_width + self.border_size, self._box_height + self.border_size)
+        self._background_box.draw_sized(self.center_x, self.center_y, self._box_width + self.border_size,
+                                        self._box_height + self.border_size)
         # self._full_box.draw_sized(self.center_x - (self._box_width / 2) + (self._full_width / 2), self.center_y, self._full_width, self._box_height)
-        arcade.draw_rectangle_filled(self.center_x - (self._box_width / 2) + (self._full_width / 2), self.center_y, self._full_width, self._box_height, (0, 0, 0, 100))
+        arcade.draw_rectangle_filled(self.center_x - (self._box_width / 2) + (self._full_width / 2), self.center_y,
+                                     self._full_width, self._box_height, (0, 0, 0, 100))
 
     @property
     def fullness(self) -> float:
@@ -72,3 +75,17 @@ class IndicatorBar:
     def position(self, new_position: Tuple[float, float]) -> None:
         """Changes the current position of the bar."""
         self.center_x, self.center_y = new_position
+
+
+class Button(arcade.gui.UITextureButton):
+    def __init__(self, width, height, text, font_size=20):
+        self.text = text
+        button = arcade.load_texture("sprites/gui/buttons/button.png")
+        button_hover = arcade.load_texture("sprites/gui/buttons/button_hover.png")
+        arcade.load_font("fonts/FirstTimeWriting.ttf")
+        style = {
+            "font_name": "First Time Writing!",
+            "font_size": font_size,
+            "font_color": arcade.color.BLACK,
+        }
+        super().__init__(width=width, height=height, texture=button, texture_hovered=button_hover, text=text, style=style)
