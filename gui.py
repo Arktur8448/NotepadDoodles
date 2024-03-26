@@ -78,8 +78,10 @@ class IndicatorBar:
 
 
 class Button(arcade.gui.UITextureButton):
-    def __init__(self, width, height, text, font_size=20):
+    def __init__(self, width, height, text, font_size=25):
         self.text = text
+        self.hover_width = width * 1.1
+        self.hover_height = height * 1.1
         button = arcade.load_texture("sprites/gui/buttons/button.png")
         button_hover = arcade.load_texture("sprites/gui/buttons/button_hover.png")
         arcade.load_font("fonts/FirstTimeWriting.ttf")

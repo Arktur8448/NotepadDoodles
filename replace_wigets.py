@@ -661,6 +661,7 @@
 #         self._tex_pressed = texture_pressed
 #         self._style = style or {}
 #         self._text = text
+#         self.ifTextDrawed = False
 #
 #     @property
 #     def text(self):
@@ -710,7 +711,8 @@
 #         if tex:
 #             surface.draw_texture(0, 0, self.width, self.height, tex)
 #
-#         if self.text:
+#         if self.text and not self.ifTextDrawed:
+#             self.ifTextDrawed = True
 #             text_margin = 2
 #             font_size = self._style.get("font_size", 15)
 #             font_color = self._style.get("font_color", arcade.color.WHITE)

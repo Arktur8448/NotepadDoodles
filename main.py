@@ -41,11 +41,11 @@ class GameWindow(arcade.Window):
 
 class GameView(arcade.View):
 
-    def __init__(self, player_object):
+    def __init__(self, main_menu_view):
         super().__init__()
 
         self.camera_speed = None
-        self.playerObject = player_object
+        self.playerObject = self.window.playerObject
 
         self.tile_map = None
         self.scene = None
@@ -59,6 +59,8 @@ class GameView(arcade.View):
         self.inventoryView = None
 
         self.waveManager = None
+
+        self.main_menu_view = main_menu_view
 
     def setup(self):
         self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -221,19 +223,6 @@ class PauseView(arcade.View):
 
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
-        style = {
-            "font_name": "First Time Writing!",
-            "font_size": 15,
-            "font_color": arcade.color.BLACK,
-            "border_width": 2,
-            "border_color": None,
-            "bg_color": (248 - 20, 245 - 20, 226 - 20),
-
-            # used if button is pressed
-            "bg_color_pressed": BG_COLOR,
-            "border_color_pressed": arcade.color.BLACK,  # also used when hovered
-            "font_color_pressed": arcade.color.GRAY,
-        }
 
         self.v_box = arcade.gui.UIBoxLayout()
 
@@ -306,15 +295,97 @@ class PauseView(arcade.View):
         self.window.show_view(self.game_view)
 
     def main_menu(self, event=None):
+        self.window.show_view(self.game_view.main_menu_view)
+
+
+class MainMenuView(arcade.View):
+    def __init__(self):
+        super().__init__()
+        self.scene = None
+        self.camera = None
+        self.x = 0
+        self.y = 0
+
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+
+        self.v_box = arcade.gui.UIBoxLayout()
+
+        start_button = gui.Button(width=400, height=80, text="Start")
+        self.v_box.add(start_button.with_space_around(bottom=80))
+        start_button.on_click = self.start
+
+        settings_button = gui.Button(width=400, height=80, text="Settings")
+        self.v_box.add(settings_button.with_space_around(bottom=80))
+
+        quit_button = gui.Button(width=400, height=80, text="Exit")
+        self.v_box.add(quit_button.with_space_around(bottom=80))
+        quit_button.on_click = self.exit
+
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="center_x",
+                anchor_y="top",
+                align_y=-550,
+                child=self.v_box)
+        )
+
+    def on_show_view(self):
+        self.scene = arcade.Scene()
+        bg_scale = 0.4
+        tile_map = arcade.load_tilemap("maps/notepad/Notepad.tmx", 2 * bg_scale)
+        self.scene = arcade.Scene.from_tilemap(tile_map)
+        if tile_map.background_color:
+            arcade.set_background_color(tile_map.background_color)
+
+        self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.camera.move_to((60, 460))
+
+    def on_draw(self):
+        self.clear()
+        self.camera.use()
+
+        self.scene.draw()
+
+        notepad = arcade.Text(
+            f"NOTEPAD",
+            SCREEN_WIDTH / 2 + 60,
+            SCREEN_HEIGHT + 225,
+            (0, 0, 0, 255),
+            80,
+            font_name="First Time Writing!",
+            anchor_x="center",
+        )
+        notepad.draw()
+
+        doodles = arcade.Text(
+            f"DOODLES",
+            SCREEN_WIDTH / 2 + 60,
+            SCREEN_HEIGHT + 50,
+            (0, 0, 0, 255),
+            110,
+            font_name="First Time Writing!",
+            anchor_x="center",
+        )
+        doodles.draw()
+
+        self.manager.draw()
+
+    def start(self, event=None):
+        gameView = GameView(self)
+        gameView.setup()
+        self.window.show_view(gameView)
+
+    def exit(self, event=None):
         arcade.exit()
 
 
 def main():
     player_object = pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2, characters.StickMan())
     window = GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, player_object)
-    start_view = GameView(player_object)
+    # start_view = GameView(player_object)
+    start_view = MainMenuView()
     window.show_view(start_view)
-    start_view.setup()
     arcade.run()
 
 
