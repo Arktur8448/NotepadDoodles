@@ -308,7 +308,7 @@ class Player(arcade.Sprite):
     def _setup_character(self):
         print(self.character.name)
         print(self.character.desc)
-        print(self.character.generate_detailed_desc(self))
+        print(self.character.generate_detailed_desc())
         self.character.apply_multiplayer(self)
         self.character.character_start_skills(self)
         self.character.character_variables_modifiers(self)

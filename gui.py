@@ -90,4 +90,43 @@ class Button(arcade.gui.UITextureButton):
             "font_size": font_size,
             "font_color": arcade.color.BLACK,
         }
-        super().__init__(width=width, height=height, texture=button, texture_hovered=button_hover, text=text, style=style)
+        super().__init__(width=width, height=height, texture=button, texture_hovered=button_hover, text=text,
+                         style=style)
+
+
+class CharacterCard:
+    def __init__(self, x, y, character, desc_font_size_scale=1):
+        self.scale = 1.4
+        self.character = character
+
+        self.border = arcade.Sprite("sprites/card/border.png", center_x=x, center_y=y, scale=1.25 * self.scale)
+        self.image = arcade.Sprite(f"sprites/player/{self.character.name.lower()}/player_idle_1.png",
+                                   center_x=self.border.left + 62 * self.scale, center_y=self.border.top - 52 * self.scale,
+                                   image_height=64, image_width=64, scale=self.scale)
+        self.name = arcade.Text(
+            self.character.name,
+            self.image.right + 10 * self.scale,
+            self.image.center_y - 10 * self.scale,
+            color=arcade.color.BLACK,
+            font_size=25 * self.scale,
+            font_name="First Time Writing!",
+            bold=True,
+        )
+        self.desc = arcade.Text(
+            self.character.desc + "\n" + self.character.generate_detailed_desc(),
+            x + 5 * self.scale,
+            y + 55 * self.scale,
+            color=(0, 0, 0, 255),
+            font_size=10 * self.scale * desc_font_size_scale,
+            font_name="First Time Writing!",
+            bold=True,
+            anchor_x="center",
+            width=self.border.width - 30 * self.scale,
+            multiline=True,
+        )
+
+    def draw(self):
+        self.border.draw()
+        self.image.draw()
+        self.name.draw()
+        self.desc.draw()

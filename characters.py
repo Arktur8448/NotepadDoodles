@@ -60,14 +60,14 @@ class Character:
         playerObject.walk_time_interval /= self.base_movement_speed
         playerObject.sprint_time_interval /= self.base_movement_speed
 
-    def generate_detailed_desc(self, playerObject):
+    def generate_detailed_desc(self):
         desc = ""
 
         # HP and Regeneration
         if self.base_hp != 1:
             hp_modifier = (self.base_hp * 100 - 100)
             sign = "+" if hp_modifier >= 0 else "-"
-            desc += f"Hp: {sign}{abs(hp_modifier)}% ({playerObject.max_hp * self.base_hp})\n"
+            desc += f"Hp: {sign}{abs(hp_modifier)}% ({100 * self.base_hp})\n"
         if self.base_hp_regen_rate != 1:
             regen_modifier = (self.base_hp_regen_rate * 100 - 100)
             sign = "+" if regen_modifier >= 0 else "-"
@@ -77,7 +77,7 @@ class Character:
         if self.base_stamina != 1:
             stamina_modifier = (self.base_stamina * 100 - 100)
             sign = "+" if stamina_modifier >= 0 else "-"
-            desc += f"Stamina: {sign}{abs(stamina_modifier)}% ({playerObject.max_stamina * self.base_stamina})\n"
+            desc += f"Stamina: {sign}{abs(stamina_modifier)}% ({10 * self.base_stamina})\n"
         if self.base_stamina_regen_rate != 1:
             stamina_regen_modifier = (self.base_stamina_regen_rate * 100 - 100)
             sign = "+" if stamina_regen_modifier >= 0 else "-"

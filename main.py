@@ -366,24 +366,63 @@ class MainMenuView(arcade.View):
             110,
             font_name="First Time Writing!",
             anchor_x="center",
+            bold=True
         )
         doodles.draw()
 
         self.manager.draw()
 
     def start(self, event=None):
-        gameView = GameView(self)
-        gameView.setup()
-        self.window.show_view(gameView)
+        charactersView = CharacterView(self)
+        self.window.show_view(charactersView)
 
     def exit(self, event=None):
         arcade.exit()
 
 
+class CharacterView(arcade.View):
+    def __init__(self, mainMenu):
+        super().__init__()
+        self.characters = None
+        self.mainMenu = mainMenu
+        self.scene = None
+
+    def on_show_view(self):
+        self.scene = arcade.Scene()
+        self.scene.add_sprite_list("BG")
+        for r in range(0, int(SCREEN_HEIGHT/64) + 1):
+            for c in range(0, int(SCREEN_WIDTH/64) + 1):
+                self.scene.add_sprite("BG", arcade.Sprite("maps/notepad/Lines.png", center_x=64*c, center_y=64*r))
+        self.characters = [
+            gui.CharacterCard(320, SCREEN_HEIGHT - 350, characters.StickMan()),
+            gui.CharacterCard(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 350, characters.Golem()),
+            gui.CharacterCard(SCREEN_WIDTH - 320, SCREEN_HEIGHT - 350, characters.Warrior()),
+            gui.CharacterCard(320, 250, characters.Ranger(), desc_font_size_scale=0.95),
+            gui.CharacterCard(SCREEN_WIDTH / 2, 250, characters.Wizard()),
+        ]
+
+    def on_draw(self):
+        self.clear()
+        self.scene.draw()
+        for c in self.characters:
+            c.draw()
+
+        text = arcade.Text(
+            "CHOOSE CHARACTER",
+            SCREEN_WIDTH / 2,
+            SCREEN_HEIGHT - 80,
+            (0, 0, 0, 255),
+            50,
+            font_name="First Time Writing!",
+            anchor_x="center",
+            bold=True
+        )
+        text.draw()
+
+
 def main():
-    player_object = pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2, characters.StickMan())
+    player_object = pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2, characters.Wizard())
     window = GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, player_object)
-    # start_view = GameView(player_object)
     start_view = MainMenuView()
     window.show_view(start_view)
     arcade.run()
