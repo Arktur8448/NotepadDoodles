@@ -2,6 +2,8 @@ import arcade
 import arcade.gui
 from typing import Tuple
 
+SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
+
 
 class IndicatorBar:
     """
@@ -10,7 +12,6 @@ class IndicatorBar:
     bar components.
     :param center_x: The initial position x of the bar.
     :param center_y: The initial position y of the bar.
-    :param arcade.Color fullness_sprite: The path to fullness sprite.
     :param arcade.Color background_sprite: The path to background sprite.
     :param int width: The width of the bar.
     :param int height: The height of the bar.
@@ -95,13 +96,17 @@ class Button(arcade.gui.UITextureButton):
 
 
 class CharacterCard:
-    def __init__(self, x, y, character, desc_font_size_scale=1):
-        self.scale = 1.4
+    def __init__(self, x, y, character,view, desc_font_size_scale=1):
+        if SCREEN_WIDTH != 1920 or SCREEN_HEIGHT != 1080:
+            self.scale = min(SCREEN_WIDTH / 1920, SCREEN_HEIGHT / 1080) * 1.2
+        else:
+            self.scale = 1.4
         self.character = character
+        self.view = view
 
         self.border = arcade.Sprite("sprites/card/border.png", center_x=x, center_y=y, scale=1.25 * self.scale)
         self.image = arcade.Sprite(f"sprites/player/{self.character.name.lower()}/player_idle_1.png",
-                                   center_x=self.border.left + 62 * self.scale, center_y=self.border.top - 52 * self.scale,
+                                   center_x=self.border.left + 42 * self.scale, center_y=self.border.top - 52 * self.scale,
                                    image_height=64, image_width=64, scale=self.scale)
         self.name = arcade.Text(
             self.character.name,
@@ -124,9 +129,24 @@ class CharacterCard:
             width=self.border.width - 30 * self.scale,
             multiline=True,
         )
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+        play = Button(178 * self.scale, 35 * self.scale, "PLAY")
+        play.on_click = self.start
+        self.manager.add(arcade.gui.UIAnchorWidget(
+                anchor_x="left",
+                anchor_y="bottom",
+                align_x=self.border.right - play.width - 40,
+                align_y=self.border.top - play.height - 20,
+                child=play)
+        )
 
     def draw(self):
         self.border.draw()
         self.image.draw()
         self.name.draw()
         self.desc.draw()
+        self.manager.draw()
+
+    def start(self, event=None):
+        self.view.play(self.character)

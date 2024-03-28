@@ -10,25 +10,35 @@ import waves
 import arcade.gui
 import gui
 
+# TODO
+# settings: vsync , antialiasing , show_fps
+# export 
+# icon, screens, logo, desc
+# account on itch
+
+
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 MAP_WIDTH = 3950
 MAP_HEIGHT = 3530
 MAP_START_WIDTH = 1170
 MAP_START_HEIGHT = 1075
-SCREEN_TITLE = "THE GAME"
+SCREEN_TITLE = "NOTEPAD DOODLES"
 CAMERA_SPEED = 0.05  # szybokość z jaką kamera nadąża za graczem od 0 do 1
 BG_COLOR = (248, 245, 226)
 
 
 class GameWindow(arcade.Window):
-    def __init__(self, width, height, title, player_object):
+    def __init__(self, width, height, title):
         super().__init__(width, height, title, fullscreen=True, antialiasing=True)
         self.set_vsync(True)
-        self.playerObject = player_object
         arcade.load_font("fonts/FirstTimeWriting.ttf")
+        self.playerObject = None
 
     def on_key_press(self, key, key_modifiers):
-        self.playerObject.keys[key] = True
+        try:
+            self.playerObject.keys[key] = True
+        except:
+            pass
 
     def on_key_release(self, key, key_modifiers):
         try:
@@ -38,14 +48,19 @@ class GameWindow(arcade.Window):
         if key == arcade.key.O:
             print(arcade.get_scaling_factor(self))
 
+    def on_resize(self, width: float, height: float):
+        global SCREEN_WIDTH, SCREEN_HEIGHT
+        SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
+
 
 class GameView(arcade.View):
 
-    def __init__(self, main_menu_view):
+    def __init__(self, playerObject):
         super().__init__()
 
         self.camera_speed = None
-        self.playerObject = self.window.playerObject
+        self.playerObject = playerObject
+        self.window.playerObject = self.playerObject
 
         self.tile_map = None
         self.scene = None
@@ -59,8 +74,6 @@ class GameView(arcade.View):
         self.inventoryView = None
 
         self.waveManager = None
-
-        self.main_menu_view = main_menu_view
 
     def setup(self):
         self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -97,8 +110,10 @@ class GameView(arcade.View):
         self.enemy_physics_engine.add_sprite_list(self.scene.get_sprite_list("collision"),
                                                   collision_type="wall",
                                                   body_type=arcade.PymunkPhysicsEngine.STATIC)
-
-        arcade.enable_timings()
+        try:
+            arcade.enable_timings()
+        except:
+            pass
 
         self.waveManager = waves.WaveManager(5)
 
@@ -295,7 +310,7 @@ class PauseView(arcade.View):
         self.window.show_view(self.game_view)
 
     def main_menu(self, event=None):
-        self.window.show_view(self.game_view.main_menu_view)
+        self.window.show_view(MainMenuView())
 
 
 class MainMenuView(arcade.View):
@@ -373,7 +388,7 @@ class MainMenuView(arcade.View):
         self.manager.draw()
 
     def start(self, event=None):
-        charactersView = CharacterView(self)
+        charactersView = CharacterView()
         self.window.show_view(charactersView)
 
     def exit(self, event=None):
@@ -381,11 +396,22 @@ class MainMenuView(arcade.View):
 
 
 class CharacterView(arcade.View):
-    def __init__(self, mainMenu):
+    def __init__(self):
         super().__init__()
-        self.characters = None
-        self.mainMenu = mainMenu
+        self.characters = []
         self.scene = None
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+        back_texture = arcade.load_texture("sprites/gui/buttons/back.png")
+        back = arcade.gui.UITextureButton(200, SCREEN_HEIGHT-200, width=64, height=64, texture=back_texture)
+        back.on_click = self.show_main_menu
+        self.manager.add(arcade.gui.UIAnchorWidget(
+                anchor_x="left",
+                anchor_y="top",
+                align_x=20,
+                align_y=-20,
+                child=back)
+        )
 
     def on_show_view(self):
         self.scene = arcade.Scene()
@@ -394,11 +420,11 @@ class CharacterView(arcade.View):
             for c in range(0, int(SCREEN_WIDTH/64) + 1):
                 self.scene.add_sprite("BG", arcade.Sprite("maps/notepad/Lines.png", center_x=64*c, center_y=64*r))
         self.characters = [
-            gui.CharacterCard(320, SCREEN_HEIGHT - 350, characters.StickMan()),
-            gui.CharacterCard(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 350, characters.Golem()),
-            gui.CharacterCard(SCREEN_WIDTH - 320, SCREEN_HEIGHT - 350, characters.Warrior()),
-            gui.CharacterCard(320, 250, characters.Ranger(), desc_font_size_scale=0.95),
-            gui.CharacterCard(SCREEN_WIDTH / 2, 250, characters.Wizard()),
+            gui.CharacterCard(320, SCREEN_HEIGHT - 350, characters.StickMan(), self),
+            gui.CharacterCard(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 350, characters.Golem(), self),
+            gui.CharacterCard(SCREEN_WIDTH - 320, SCREEN_HEIGHT - 350, characters.Warrior(), self),
+            # gui.CharacterCard(320, 250, characters.Ranger(), self, desc_font_size_scale=0.95),
+            # gui.CharacterCard(SCREEN_WIDTH / 2, 250, characters.Wizard(), self),
         ]
 
     def on_draw(self):
@@ -418,11 +444,19 @@ class CharacterView(arcade.View):
             bold=True
         )
         text.draw()
+        self.manager.draw()
+
+    def show_main_menu(self, event=None):
+        self.window.show_view(MainMenuView())
+
+    def play(self, character):
+        gameView = GameView(pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2, character))
+        gameView.setup()
+        self.window.show_view(gameView)
 
 
 def main():
-    player_object = pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2, characters.Wizard())
-    window = GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE, player_object)
+    window = GameWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
     start_view = MainMenuView()
     window.show_view(start_view)
     arcade.run()
