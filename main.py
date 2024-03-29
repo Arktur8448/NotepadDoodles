@@ -10,10 +10,9 @@ import waves
 import arcade.gui
 import gui
 import json
-
+# pyinstaller --onefile --noconsole --icon=icon.ico main.py
 # TODO
-# export 
-# icon, screens, logo, desc
+# screens, logo, desc
 # account on itch
 
 
@@ -52,8 +51,6 @@ class GameWindow(arcade.Window):
             del self.playerObject.keys[key]
         except:
             pass
-        if key == arcade.key.O:
-            print(arcade.get_scaling_factor(self))
 
     def on_resize(self, width: float, height: float):
         global SCREEN_WIDTH, SCREEN_HEIGHT
@@ -161,7 +158,7 @@ class GameView(arcade.View):
             20,
             font_name="First Time Writing!"
         )
-        if settings.get("showFPS"):
+        if settings["showFps"]:
             fps.draw()
 
         coins = arcade.Text(
@@ -225,12 +222,12 @@ class GameView(arcade.View):
 
         self.waveManager.update(self.scene)
 
-        if arcade.key.K in self.playerObject.keys:
-            del self.playerObject.keys[arcade.key.K]
-            random.choice(self.scene.get_sprite_list("Enemies")).damage(100)
-        if arcade.key.L in self.playerObject.keys:
-            del self.playerObject.keys[arcade.key.L]
-            self.waveManager.current_wave.completed = True
+        # if arcade.key.K in self.playerObject.keys:
+        #     del self.playerObject.keys[arcade.key.K]
+        #     random.choice(self.scene.get_sprite_list("Enemies")).damage(100)
+        # if arcade.key.L in self.playerObject.keys:
+        #     del self.playerObject.keys[arcade.key.L]
+        #     self.waveManager.current_wave.completed = True
         if arcade.key.ESCAPE in self.playerObject.keys:
             del self.playerObject.keys[arcade.key.ESCAPE]
             self.window.show_view(PauseView(self))
