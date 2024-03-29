@@ -9,9 +9,9 @@ import characters
 import waves
 import arcade.gui
 import gui
+import json
 
 # TODO
-# settings: vsync , antialiasing , show_fps
 # export 
 # icon, screens, logo, desc
 # account on itch
@@ -25,12 +25,19 @@ MAP_START_HEIGHT = 1075
 SCREEN_TITLE = "NOTEPAD DOODLES"
 CAMERA_SPEED = 0.05  # szybokość z jaką kamera nadąża za graczem od 0 do 1
 BG_COLOR = (248, 245, 226)
+try:
+    with open("SETTINGS.json", 'r') as file:
+        settings = json.load(file)
+except FileNotFoundError:
+    settings = {
+        "vsync": False,
+        "showFps": False,
+    }
 
 
 class GameWindow(arcade.Window):
     def __init__(self, width, height, title):
-        super().__init__(width, height, title, fullscreen=True, antialiasing=True)
-        self.set_vsync(True)
+        super().__init__(width, height, title, fullscreen=True, antialiasing=True, vsync=settings.get("vsync"))
         arcade.load_font("fonts/FirstTimeWriting.ttf")
         self.playerObject = None
 
@@ -154,7 +161,8 @@ class GameView(arcade.View):
             20,
             font_name="First Time Writing!"
         )
-        fps.draw()
+        if settings.get("showFPS"):
+            fps.draw()
 
         coins = arcade.Text(
             f"{self.playerObject.coins}",
@@ -247,6 +255,7 @@ class PauseView(arcade.View):
 
         settings_button = gui.Button(width=400, height=80, text="Settings")
         self.v_box.add(settings_button.with_space_around(bottom=100))
+        settings_button.on_click = self.show_settings
 
         main_menu_button = gui.Button(width=400, height=80, text="Quit To Main Menu")
         self.v_box.add(main_menu_button.with_space_around(bottom=100))
@@ -274,7 +283,9 @@ class PauseView(arcade.View):
         lines = arcade.load_texture("maps/notepad/Lines.png")
         for r in range(0, int(SCREEN_HEIGHT / 1.25 / 32)):
             for c in range(0, int(SCREEN_WIDTH / 4 / 32)):
-                self.scene.add_sprite("BG", arcade.Sprite(center_x=SCREEN_WIDTH / 2.61 + 32 * c, center_y=SCREEN_HEIGHT - 100 - 32 * r, image_width=32, image_height=32, texture=lines))
+                self.scene.add_sprite("BG", arcade.Sprite(center_x=SCREEN_WIDTH / 2.61 + 32 * c,
+                                                          center_y=SCREEN_HEIGHT - 100 - 32 * r, image_width=32,
+                                                          image_height=32, texture=lines))
 
     def on_draw(self):
         self.clear()
@@ -312,14 +323,144 @@ class PauseView(arcade.View):
     def main_menu(self, event=None):
         self.window.show_view(MainMenuView())
 
+    def show_settings(self, event=None):
+        self.window.show_view(SettingsView(self))
+
+
+class SettingsView(arcade.View):
+    def __init__(self, back_view):
+        super().__init__()
+        self.manager = None
+        self.scene = None
+        self.camera = None
+        self.back_view = back_view
+        if settings["vsync"]:
+            self.vsync_text = "X"
+        else:
+            self.vsync_text = " "
+        if settings["showFps"]:
+            self.fps_text = "X"
+        else:
+            self.fps_text = " "
+
+    def generate_buttons(self):
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+        back_texture = arcade.load_texture("sprites/gui/buttons/back.png")
+        back = arcade.gui.UITextureButton(200, SCREEN_HEIGHT - 200, width=64, height=64, texture=back_texture)
+        back.on_click = self.show_back_view
+        self.manager.add(arcade.gui.UIAnchorWidget(
+            anchor_x="left",
+            anchor_y="top",
+            align_x=20,
+            align_y=-20,
+            child=back)
+        )
+
+        v_box = arcade.gui.UIBoxLayout()
+
+        vsync_box = arcade.gui.UIBoxLayout(vertical=False)
+        vs_text = arcade.gui.UITextArea(text="V-sync",
+                                        width=600,
+                                        height=125,
+                                        font_size=70,
+                                        font_name="First Time Writing!",
+                                        text_color=arcade.color.BLACK,
+                                        )
+        vs_button = gui.Button(100, 100, self.vsync_text, font_size=50)
+        vs_button.on_click = self.toggle_vsync
+        vsync_box.add(vs_text)
+        vsync_box.add(vs_button)
+        v_box.add(vsync_box.with_space_around(bottom=100))
+
+        fps_box = arcade.gui.UIBoxLayout(vertical=False)
+        fps_text = arcade.gui.UITextArea(text="Show FPS",
+                                         width=600,
+                                         height=125,
+                                         font_size=70,
+                                         font_name="First Time Writing!",
+                                         text_color=arcade.color.BLACK,
+                                         )
+        fps_button = gui.Button(100, 100, self.fps_text, font_size=50)
+        fps_button.on_click = self.toggle_fps
+        fps_box.add(fps_text)
+        fps_box.add(fps_button)
+        v_box.add(fps_box.with_space_around(bottom=100))
+
+        self.manager.add(
+            arcade.gui.UIAnchorWidget(
+                anchor_x="center_x",
+                anchor_y="top",
+                align_y=-300,
+                child=v_box)
+        )
+
+    def on_show_view(self):
+        self.scene = arcade.Scene()
+        bg_scale = 0.4
+        tile_map = arcade.load_tilemap("maps/notepad/Notepad.tmx", 2 * bg_scale)
+        self.scene = arcade.Scene.from_tilemap(tile_map)
+        if tile_map.background_color:
+            arcade.set_background_color(tile_map.background_color)
+
+        self.camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.camera.move_to((60, 460))
+        self.generate_buttons()
+
+    def on_draw(self):
+        self.clear()
+        self.camera.use()
+
+        self.scene.draw()
+        text = arcade.Text(
+            "SETTINGS",
+            SCREEN_WIDTH / 2 + 60,
+            SCREEN_HEIGHT * 1.25,
+            (0, 0, 0, 255),
+            50,
+            font_name="First Time Writing!",
+            anchor_x="center",
+            bold=True
+        )
+        text.draw()
+
+        self.manager.draw()
+
+    def show_back_view(self, event=None):
+        self.window.show_view(self.back_view)
+
+    def toggle_vsync(self, event=None):
+        if self.vsync_text == "X":
+            self.vsync_text = ""
+            self.window.set_vsync(False)
+            settings["vsync"] = False
+        else:
+            self.vsync_text = "X"
+            self.window.set_vsync(True)
+            settings["vsync"] = True
+        self.generate_buttons()
+        self.save_settings()
+
+    def toggle_fps(self, event=None):
+        if self.fps_text == "X":
+            self.fps_text = ""
+            settings["showFps"] = False
+        else:
+            self.fps_text = "X"
+            settings["showFps"] = True
+        self.generate_buttons()
+        self.save_settings()
+
+    def save_settings(self):
+        with open("SETTINGS.json", 'w') as file:
+            json.dump(settings, file)
+
 
 class MainMenuView(arcade.View):
     def __init__(self):
         super().__init__()
         self.scene = None
         self.camera = None
-        self.x = 0
-        self.y = 0
 
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
@@ -332,6 +473,7 @@ class MainMenuView(arcade.View):
 
         settings_button = gui.Button(width=400, height=80, text="Settings")
         self.v_box.add(settings_button.with_space_around(bottom=80))
+        settings_button.on_click = self.show_settings
 
         quit_button = gui.Button(width=400, height=80, text="Exit")
         self.v_box.add(quit_button.with_space_around(bottom=80))
@@ -394,6 +536,9 @@ class MainMenuView(arcade.View):
     def exit(self, event=None):
         arcade.exit()
 
+    def show_settings(self, event=None):
+        self.window.show_view(SettingsView(self))
+
 
 class CharacterView(arcade.View):
     def __init__(self):
@@ -403,22 +548,22 @@ class CharacterView(arcade.View):
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
         back_texture = arcade.load_texture("sprites/gui/buttons/back.png")
-        back = arcade.gui.UITextureButton(200, SCREEN_HEIGHT-200, width=64, height=64, texture=back_texture)
+        back = arcade.gui.UITextureButton(200, SCREEN_HEIGHT - 200, width=64, height=64, texture=back_texture)
         back.on_click = self.show_main_menu
         self.manager.add(arcade.gui.UIAnchorWidget(
-                anchor_x="left",
-                anchor_y="top",
-                align_x=20,
-                align_y=-20,
-                child=back)
+            anchor_x="left",
+            anchor_y="top",
+            align_x=20,
+            align_y=-20,
+            child=back)
         )
 
     def on_show_view(self):
         self.scene = arcade.Scene()
         self.scene.add_sprite_list("BG")
-        for r in range(0, int(SCREEN_HEIGHT/64) + 1):
-            for c in range(0, int(SCREEN_WIDTH/64) + 1):
-                self.scene.add_sprite("BG", arcade.Sprite("maps/notepad/Lines.png", center_x=64*c, center_y=64*r))
+        for r in range(0, int(SCREEN_HEIGHT / 64) + 1):
+            for c in range(0, int(SCREEN_WIDTH / 64) + 1):
+                self.scene.add_sprite("BG", arcade.Sprite("maps/notepad/Lines.png", center_x=64 * c, center_y=64 * r))
         self.characters = [
             gui.CharacterCard(320, SCREEN_HEIGHT - 350, characters.StickMan(), self),
             gui.CharacterCard(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 350, characters.Golem(), self),
