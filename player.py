@@ -251,7 +251,7 @@ class Player(arcade.Sprite):
             stamina_bar = gui.IndicatorBar(self.center_x, self.center_y + 70, "sprites/gui/bars/Bar.png", 80, 14, 2)
             stamina_bar.fullness = self.stamina / self.max_stamina
             stamina_bar.draw()
-            piorun = arcade.Sprite("sprites/gui/bars/Piorun.png", scale=0.5)
+            piorun = arcade.Sprite("sprites/gui/bars/Lightning.png", scale=0.5)
             piorun.center_x = self.center_x - 42
             piorun.center_y = self.center_y + 70
             piorun.draw()
@@ -270,7 +270,7 @@ class Player(arcade.Sprite):
             stamina_bar = gui.IndicatorBar(self.center_x, self.center_y + 70, "sprites/gui/bars/Bar.png", 80, 14, 2)
             stamina_bar.fullness = 0
             stamina_bar.draw()
-            piorun = arcade.Sprite("sprites/gui/bars/Piorun.png", scale=0.5)
+            piorun = arcade.Sprite("sprites/gui/bars/Lightning.png", scale=0.5)
             piorun.center_x = self.center_x - 42
             piorun.center_y = self.center_y + 70
             piorun.draw()
