@@ -77,7 +77,7 @@ class Character:
         if self.base_stamina != 1:
             stamina_modifier = (self.base_stamina * 100 - 100)
             sign = "+" if stamina_modifier >= 0 else "-"
-            desc += f"Stamina: {sign}{abs(stamina_modifier)}% ({10 * self.base_stamina})\n"
+            desc += f"Stamina: {sign}{abs(stamina_modifier)}% ({15 * self.base_stamina})\n"
         if self.base_stamina_regen_rate != 1:
             stamina_regen_modifier = (self.base_stamina_regen_rate * 100 - 100)
             sign = "+" if stamina_regen_modifier >= 0 else "-"
@@ -138,9 +138,9 @@ class Golem(Character):
     def __init__(self):
         self.name = "Golem"
         self.desc = "The powerful golem with great defence. He is very slow and wonky. His hp takes a long time to regenerate"
-        super().__init__(self.name, self.desc, base_hp=2, base_defence=2, base_stamina=0, base_stamina_regen_rate=0,
-                         base_hp_regen_rate=0.3,
-                         base_movement_speed=0.5, base_agility=0.25, base_dodge=0, base_strength=1.5)
+        super().__init__(self.name, self.desc, base_hp=2.5, base_defence=2, base_stamina=0, base_stamina_regen_rate=0,
+                         base_hp_regen_rate=0.5,
+                         base_movement_speed=0.5, base_agility=0.25, base_dodge=0, base_strength=2)
         self.detailed_desc_addition = "Cannot Sprint or Dash or Dodge\nCannot regenerate any stamina"
 
     def character_skills(self, playerObject):

@@ -6,6 +6,7 @@ import time
 from pyglet.math import Vec2
 import gui
 import items
+import main
 
 DELTA_TIME = 1 / 60
 
@@ -15,9 +16,9 @@ class Player(arcade.Sprite):
         super().__init__(filename=sprite_path, center_x=x, center_y=y, scale=0.8)
         self.character = character
 
-        self.movement_speed = 5000
+        self.movement_speed = 6000
         self.sprint_multiplayer = 1.25
-        self.max_sprint_speed = 3600
+        self.max_sprint_speed = 4000
 
         self.dash_distance = 2000
         self.dash_cooldown = 1
@@ -48,7 +49,7 @@ class Player(arcade.Sprite):
         self.hp_regen_rate = 1  # Per second
 
         self.stamina = 9999999999
-        self.max_stamina = 10
+        self.max_stamina = 15
         self.can_regen_stamina = True
         self.stamina_regen_rate = 2  # Per second
         self.stamina_sprint_use = 3  # Per second
@@ -70,8 +71,8 @@ class Player(arcade.Sprite):
         self.sprint_time_interval = 0.3
         self.walk_time_interval = 0.5
 
-        self.weapons = [items.Weapon("sprites/gui/bars/Bar.png", "TOPÓR", damage=10, speed=2, attack_range=1, slash_scale=1.5),
-                        items.Weapon("sprites/gui/bars/Bar.png", "Dagger", damage=2, speed=0.5, attack_range=0.75)]
+        self.weapons = [items.Weapon("sprites/gui/bars/Bar.png", "TOPÓR", damage=15, speed=2, attack_range=1, slash_scale=1.5),
+                        items.Weapon("sprites/gui/bars/Bar.png", "Dagger", damage=5, speed=0.5, attack_range=0.75)]
 
         self.coins = 0
 
@@ -174,7 +175,7 @@ class Player(arcade.Sprite):
         if self.moving or self.isDashing:
             move_camera_to_player(camera_speed)
 
-    def update_player(self, gameView):
+    def update_player(self, gameView, window):
         self.character.character_skills(self)
         self.gameView = gameView
         physics_engine = gameView.physics_engine
@@ -245,6 +246,8 @@ class Player(arcade.Sprite):
                 _hit_animation()
 
         _update_animation()
+        if self.hp <= 0:
+            window.show_view(main.MainMenuView())
 
     def show_bars(self):
         if self.stamina != self.max_stamina and not self.max_stamina == 0 and not self.stamina < 0:

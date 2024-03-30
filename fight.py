@@ -48,10 +48,13 @@ def update(gameView):
             enemiesInCollision = sprite.collides_with_list(enemies)
             enemyToDamage = None
             for e in enemiesInCollision:
-                if enemyToDamage is None:
-                    enemyToDamage = e
-                elif e.distance < enemyToDamage.distance:
-                    enemyToDamage = e
+                try:
+                    if enemyToDamage is None:
+                        enemyToDamage = e
+                    elif e.distance < enemyToDamage.distance:
+                        enemyToDamage = e
+                except:
+                    continue
             if enemyToDamage is not None:
                 if enemyToDamage.direction_move == "Left":
                     slash = Slash(enemyToDamage.center_x, enemyToDamage.center_y, weapon.slash_scale, True)

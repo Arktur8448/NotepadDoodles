@@ -119,7 +119,7 @@ class GameView(arcade.View):
         except:
             pass
 
-        self.waveManager = waves.WaveManager(5)
+        self.waveManager = waves.WaveManager(5, spawn_cooldown_change=-0.25)
 
         self.waveManager.get_wave(1).add_enemy(enemies.Slime)
 
@@ -202,7 +202,7 @@ class GameView(arcade.View):
         self.enemy_physics_engine.step()
 
         self.playerObject.movement(self.camera, CAMERA_SPEED, SCREEN_WIDTH, SCREEN_HEIGHT, self.physics_engine)
-        self.playerObject.update_player(self)
+        self.playerObject.update_player(self, self.window)
 
         for e in self.scene.get_sprite_list("Enemies"):
             try:

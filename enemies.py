@@ -187,8 +187,8 @@ class Enemy(arcade.Sprite):
 
 class Slime(Enemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=4, max_coin_drop=5, hp=5, defence=0, dodge=10, move_speed=2,
-                         attack_damage=2)
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=4, max_coin_drop=5, hp=5, defence=0, dodge=10, move_speed=1.5,
+                         attack_damage=5)
         self.name = "Slime"
         self.move_time_interval = 0.2
         self.scale = 0.8
@@ -197,9 +197,9 @@ class Slime(Enemy):
 
 class SlimeMedium(Enemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10, defence=10, dodge=5,
-                         move_speed=1.5,
-                         attack_damage=7)
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10, defence=5, dodge=5,
+                         move_speed=1.25,
+                         attack_damage=7, attack_cooldown=1.5)
         self.name = "Slime"
         self.move_time_interval = 0.2
         self.scale = 1.25
@@ -211,9 +211,9 @@ class SlimeMedium(Enemy):
 
 class SlimeBig(Enemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=15, max_coin_drop=20, hp=30, defence=20, dodge=3,
-                         move_speed=1,
-                         attack_damage=15)
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=15, max_coin_drop=20, hp=20, defence=10, dodge=3,
+                         move_speed=0.75,
+                         attack_damage=12, attack_cooldown=2)
         self.name = "Slime"
         self.move_time_interval = 0.2
         self.scale = 1.5
