@@ -166,7 +166,7 @@ class Ranger(Character):
         self.desc = "The the accurate sniper. Have have high accuracy and dodge. But he is very vulnerable and have no clue how to use close-range weapons."
         super().__init__(self.name, self.desc, base_hp=0.5, base_defence=0.5, base_stamina=1.5,
                          base_stamina_regen_rate=1.5,
-                         base_movement_speed=1.25, base_dash_distance=2, base_dash_cooldown=0.5, base_dash_duration=0.5,
+                         base_movement_speed=1.25, base_dash_distance=2, base_dash_cooldown=0.75, base_dash_duration=0.5,
                          base_accuracy=2, base_dodge=2, base_agility=1.25, base_strength=0)
         self.detailed_desc_addition = "Cannot use close-range weapons\n"
 
@@ -177,6 +177,17 @@ class Wizard(Character):
         self.desc = "The the wise wizard. He cast powerful spells. He despise other weapons than spells."
         super().__init__(self.name, self.desc, base_hp=0.75, base_stamina=1.5,
                          base_stamina_regen_rate=1.25,
-                         base_movement_speed=1.5,
+                         base_movement_speed=1.3,
                          base_dodge=1.25, base_agility=2, base_strength=0, base_accuracy=0)
         self.detailed_desc_addition = "Cannot use close range weapons\nCannot use ranged weapons"
+
+
+class Thief(Character):
+    def __init__(self):
+        self.name = "Thief"
+        self.desc = "The sneaky thief. He is fast and skilled. He has low resistance but he can always run away"
+        super().__init__(self.name, self.desc,
+                         base_hp=0.5, base_stamina=1.5,
+                         base_movement_speed=1.5,
+                         base_dodge=1.5, base_dash_cooldown=0.5, base_dash_duration=0.4,
+                         base_agility=1.5, base_defence=0.5)

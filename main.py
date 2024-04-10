@@ -225,9 +225,9 @@ class GameView(arcade.View):
         # if arcade.key.K in self.playerObject.keys:
         #     del self.playerObject.keys[arcade.key.K]
         #     random.choice(self.scene.get_sprite_list("Enemies")).damage(100)
-        # if arcade.key.L in self.playerObject.keys:
-        #     del self.playerObject.keys[arcade.key.L]
-        #     self.waveManager.current_wave.completed = True
+        if arcade.key.L in self.playerObject.keys:
+            del self.playerObject.keys[arcade.key.L]
+            self.waveManager.current_wave.completed = True
         if arcade.key.ESCAPE in self.playerObject.keys:
             del self.playerObject.keys[arcade.key.ESCAPE]
             self.window.show_view(PauseView(self))
@@ -565,8 +565,9 @@ class CharacterView(arcade.View):
             gui.CharacterCard(320, SCREEN_HEIGHT - 350, characters.StickMan(), self),
             gui.CharacterCard(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 350, characters.Golem(), self),
             gui.CharacterCard(SCREEN_WIDTH - 320, SCREEN_HEIGHT - 350, characters.Warrior(), self),
-            # gui.CharacterCard(320, 250, characters.Ranger(), self, desc_font_size_scale=0.95),
-            # gui.CharacterCard(SCREEN_WIDTH / 2, 250, characters.Wizard(), self),
+            gui.CharacterCard(320, 250, characters.Thief(), self, desc_font_size_scale=0.95),
+            gui.CharacterCard(SCREEN_WIDTH / 2, 250, characters.Wizard(), self),
+            gui.CharacterCard(SCREEN_WIDTH - 320, 250, characters.Ranger(), self),
         ]
 
     def on_draw(self):
