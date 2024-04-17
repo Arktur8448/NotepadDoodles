@@ -58,7 +58,7 @@ class Player(arcade.Sprite):
         self.defence = 100  # Defence and change to block damage
         self.agility = 100  # Magic
         self.dodge = 100  # Dodge the damage
-        self.accuracy = 100 # Ranged
+        self.accuracy = 100  # Ranged
 
         self.cur_texture = 1
         self.time_counter = 0
@@ -71,8 +71,7 @@ class Player(arcade.Sprite):
         self.sprint_time_interval = 0.3
         self.walk_time_interval = 0.5
 
-        self.weapons = [items.Weapon("sprites/gui/bars/Bar.png", "TOPÓR", damage=15, speed=2, attack_range=1, slash_scale=1.5),
-                        items.Weapon("sprites/gui/bars/Bar.png", "Dagger", damage=5, speed=0.5, attack_range=0.75)]
+        self.weapons = []
 
         self.coins = 0
 

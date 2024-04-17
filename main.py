@@ -10,10 +10,14 @@ import waves
 import arcade.gui
 import gui
 import json
+
 # pyinstaller --onefile --noconsole --icon=icon.ico main.py
 # TODO
-# screens, logo, desc
-# account on itch
+# Abilities
+# fast slash
+# blind shoot
+# boom
+# coin throw
 
 
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
@@ -95,6 +99,7 @@ class GameView(arcade.View):
         self.scene.add_sprite_list("Enemies")
         self.scene.add_sprite_list("EnemiesBars")
         self.scene.add_sprite_list("Coins")
+        self.scene.add_sprite_list("Bullets")
         self.scene.add_sprite("Player", self.playerObject)
 
         self.physics_engine = arcade.PymunkPhysicsEngine(damping=0)
@@ -221,16 +226,22 @@ class GameView(arcade.View):
         fight.update(self)
 
         self.waveManager.update(self.scene)
+        if arcade.key.ESCAPE in self.playerObject.keys:
+            del self.playerObject.keys[arcade.key.ESCAPE]
+            self.window.show_view(PauseView(self))
 
         # if arcade.key.K in self.playerObject.keys:
         #     del self.playerObject.keys[arcade.key.K]
         #     random.choice(self.scene.get_sprite_list("Enemies")).damage(100)
-        if arcade.key.L in self.playerObject.keys:
-            del self.playerObject.keys[arcade.key.L]
-            self.waveManager.current_wave.completed = True
-        if arcade.key.ESCAPE in self.playerObject.keys:
-            del self.playerObject.keys[arcade.key.ESCAPE]
-            self.window.show_view(PauseView(self))
+        # if arcade.key.L in self.playerObject.keys:
+        #     del self.playerObject.keys[arcade.key.L]
+        #     self.waveManager.current_wave.completed = True
+        # if arcade.key.E in self.playerObject.keys:
+        #     del self.playerObject.keys[arcade.key.E]
+        #     for i in range(0, 20):
+        #         b = fight.Bullet("sprites/coin.png", 300, 1, 600, self.playerObject.position)
+        #         b.shoot({self.playerObject.center_x + random.randint(-500, 500), self.playerObject.center_y + random.randint(-500, 500)})
+        #         self.scene.add_sprite("Bullets", b)
 
 
 class PauseView(arcade.View):
@@ -267,7 +278,6 @@ class PauseView(arcade.View):
         )
 
     def on_show_view(self):
-        arcade.set_background_color(arcade.color.BLACK)
         self.bg_camera = arcade.Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.bg_camera.move_to(
             (self.game_view.playerObject.center_x - (SCREEN_WIDTH / 2),
@@ -565,9 +575,9 @@ class CharacterView(arcade.View):
             gui.CharacterCard(320, SCREEN_HEIGHT - 350, characters.StickMan(), self),
             gui.CharacterCard(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 350, characters.Golem(), self),
             gui.CharacterCard(SCREEN_WIDTH - 320, SCREEN_HEIGHT - 350, characters.Warrior(), self),
-            gui.CharacterCard(320, 250, characters.Thief(), self, desc_font_size_scale=0.95),
+            gui.CharacterCard(320, 250, characters.Ranger(), self, desc_font_size_scale=0.90),
             gui.CharacterCard(SCREEN_WIDTH / 2, 250, characters.Wizard(), self),
-            gui.CharacterCard(SCREEN_WIDTH - 320, 250, characters.Ranger(), self),
+            gui.CharacterCard(SCREEN_WIDTH - 320, 250, characters.Thief(), self),
         ]
 
     def on_draw(self):
