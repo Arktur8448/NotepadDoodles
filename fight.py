@@ -79,8 +79,6 @@ def update(gameView):
 
     for s in slashes:
         s.cooldown()
-    for b in bullets:
-        b.move(scene)
 
     for weapon in weapons:
         if type(weapon) is items.Weapon:

@@ -25,7 +25,7 @@ class Coin(arcade.Sprite):
             self.collect(playerObject)
         self.distance = ((playerObject.center_x - self.center_x) ** 2 + (
                 playerObject.center_y - self.center_y) ** 2) ** 0.5
-        if self.distance < 400:
+        if self.distance < 200:
             if self.center_y < playerObject.center_y:
                 self.center_y += min(self.move_speed, playerObject.center_y - self.center_y)
 

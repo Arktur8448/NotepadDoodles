@@ -12,6 +12,7 @@ import gui
 import json
 
 # pyinstaller --onefile --noconsole --icon=icon.ico main.py
+# python -m nuitka --mingw64 main.py --windows-icon-from-ico="icon.ico" --disable-console --onefile --include-data-dir=/fonts --include-data dir=/maps  --include-data dir=/sprites
 # TODO
 # Abilities
 # fast slash
@@ -127,18 +128,22 @@ class GameView(arcade.View):
         self.waveManager = waves.WaveManager(5, spawn_cooldown_change=-0.25)
 
         self.waveManager.get_wave(1).add_enemy(enemies.Slime)
+        self.waveManager.get_wave(1).add_enemy(enemies.Skeleton)
 
         self.waveManager.get_wave(2).add_enemy(enemies.Slime)
         self.waveManager.get_wave(2).add_enemy(enemies.SlimeMedium)
+        self.waveManager.get_wave(2).add_enemy(enemies.Skeleton)
 
-        self.waveManager.get_wave(3).add_enemy(enemies.Slime)
+        self.waveManager.get_wave(3).add_enemy(enemies.Skeleton)
         self.waveManager.get_wave(3).add_enemy(enemies.SlimeMedium)
         self.waveManager.get_wave(3).add_enemy(enemies.SlimeBig)
 
         self.waveManager.get_wave(4).add_enemy(enemies.SlimeMedium)
         self.waveManager.get_wave(4).add_enemy(enemies.SlimeBig)
+        self.waveManager.get_wave(4).add_enemy(enemies.Skeleton)
 
         self.waveManager.get_wave(5).add_enemy(enemies.SlimeBig)
+        self.waveManager.get_wave(5).add_enemy(enemies.Skeleton)
 
     def on_draw(self):
         self.clear()
@@ -211,7 +216,7 @@ class GameView(arcade.View):
 
         for e in self.scene.get_sprite_list("Enemies"):
             try:
-                e.update_enemy(self.playerObject, self.enemy_physics_engine, self.scene)
+                e.update_enemy(self)
             except:
                 self.enemy_physics_engine = arcade.PymunkPhysicsEngine(damping=0)
                 self.enemy_physics_engine.add_sprite_list(self.scene.get_sprite_list("Enemies"),
@@ -223,6 +228,9 @@ class GameView(arcade.View):
         for c in self.scene.get_sprite_list("Coins"):
             c.move(self.playerObject)
 
+        for b in self.scene.get_sprite_list("Bullets"):
+            b.move(self.scene)
+
         fight.update(self)
 
         self.waveManager.update(self.scene)
@@ -230,18 +238,18 @@ class GameView(arcade.View):
             del self.playerObject.keys[arcade.key.ESCAPE]
             self.window.show_view(PauseView(self))
 
-        # if arcade.key.K in self.playerObject.keys:
-        #     del self.playerObject.keys[arcade.key.K]
-        #     random.choice(self.scene.get_sprite_list("Enemies")).damage(100)
-        # if arcade.key.L in self.playerObject.keys:
-        #     del self.playerObject.keys[arcade.key.L]
-        #     self.waveManager.current_wave.completed = True
-        # if arcade.key.E in self.playerObject.keys:
-        #     del self.playerObject.keys[arcade.key.E]
-        #     for i in range(0, 20):
-        #         b = fight.Bullet("sprites/coin.png", 300, 1, 600, self.playerObject.position)
-        #         b.shoot({self.playerObject.center_x + random.randint(-500, 500), self.playerObject.center_y + random.randint(-500, 500)})
-        #         self.scene.add_sprite("Bullets", b)
+        if arcade.key.K in self.playerObject.keys:
+            del self.playerObject.keys[arcade.key.K]
+            random.choice(self.scene.get_sprite_list("Enemies")).damage(100)
+        if arcade.key.L in self.playerObject.keys:
+            del self.playerObject.keys[arcade.key.L]
+            self.waveManager.current_wave.completed = True
+        if arcade.key.E in self.playerObject.keys:
+            del self.playerObject.keys[arcade.key.E]
+            for i in range(0, 20):
+                b = fight.Bullet("sprites/coin.png", 300, 1, 600, self.playerObject.position)
+                b.shoot({self.playerObject.center_x + random.randint(-500, 500), self.playerObject.center_y + random.randint(-500, 500)})
+                self.scene.add_sprite("Bullets", b)
 
 
 class PauseView(arcade.View):

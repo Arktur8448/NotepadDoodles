@@ -1,11 +1,14 @@
+import math
 import random
 import arcade
 import gui
 import misc
+import fight
 
 
 class Enemy(arcade.Sprite):
-    def __init__(self, name, pos_x, pos_y, min_coin_drop=0, max_coin_drop=0, hp=1, defence=1, dodge=1, move_speed=1.0, attack_damage=1, attack_cooldown=1, drop=None):
+    def __init__(self, name, pos_x, pos_y, min_coin_drop=0, max_coin_drop=0, hp=1, defence=1, dodge=1, move_speed=1.0,
+                 attack_damage=1.0, attack_cooldown=1.0, drop=None):
         super().__init__(filename=f"sprites/enemies/{name.lower()}/{name.lower()}_base.png", center_x=pos_x,
                          center_y=pos_y, scale=1)
         self.name = name
@@ -45,7 +48,7 @@ class Enemy(arcade.Sprite):
         self.distance = None
 
         self.attack_cooldown = attack_cooldown
-        self._attack_cooldown_counter = 0
+        self._attack_cooldown_counter = self.attack_cooldown
         self.canAttack = False
 
         self.attack_damage = attack_damage
@@ -64,51 +67,23 @@ class Enemy(arcade.Sprite):
         self.move_animation_count = len(self.move_right)
         self.idle_texture = arcade.load_texture(f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_base.png")
 
-    def update_enemy(self, playerObject, physics_engine, scene):
-        self.scene = scene
+    def update_enemy(self, gameView):
+        self.scene = gameView.scene
+        playerObject = gameView.playerObject
+        physics_engine = gameView.enemy_physics_engine
 
         if self._attack_cooldown_counter <= 0:
             self._attack_cooldown_counter = 0
             self.canAttack = True
         else:
-            self._attack_cooldown_counter -= 1/60
+            self._attack_cooldown_counter -= 1 / 60
 
         self.distance = ((playerObject.center_x - self.center_x) ** 2 + (
                 playerObject.center_y - self.center_y) ** 2) ** 0.5
 
-        def move_to_player():
-            self._time_move_counter = 0
-            self.ifMoving = True
-            self._time_move_counter -= 1 / 60
-            if int(self._time_move_counter) % 2 == 0 and self.distance > 15:
-                if self.distance < 500:
-                    self._time_move_counter = 0
+        self.attack_player(gameView)
 
-                if self._time_move_counter <= 0:
-                    self._time_move_counter = self._optimization_time
-                    delta_y = playerObject.center_y - self.center_y
-                    delta_x = playerObject.center_x - self.center_x
-
-                    if abs(delta_y) > abs(delta_x):
-                        if delta_y > 0:
-                            self._move_force = (0, self.move_speed)
-                        elif delta_y < 0:
-                            self._move_force = (0, -self.move_speed)
-                    else:
-                        if delta_x > 0:
-                            self._move_force = (self.move_speed, 0)
-                            self.direction_move = "Left"
-                        elif delta_x < 0:
-                            self._move_force = (-self.move_speed, 0)
-                            self.direction_move = "Right"
-
-            physics_engine.apply_force(self, self._move_force)
-
-        move_to_player()
-
-        if self.collides_with_sprite(playerObject):
-            if self.canAttack and not playerObject.isDashing:
-                self.attack_player(playerObject)
+        self.move_to_player(playerObject, physics_engine)
 
         def _update_animation(delta_time: float = 1 / 60):
             if self.ifAttack:
@@ -143,16 +118,17 @@ class Enemy(arcade.Sprite):
         _update_animation()
 
         if self.hp <= 0:
-            self.die(scene)
+            self.die(gameView.scene)
+
+    def move_to_player(self, playerObject, physics_engine):
+        """Move behaviour"""
 
     def damage(self, hp):
         self.hp -= hp
         self.playHitAnimation = True
 
-    def attack_player(self, playerObject):
-        self.canAttack = False
-        self._attack_cooldown_counter = self.attack_cooldown
-        playerObject.damage(self.attack_damage)
+    def attack_player(self, gameView):
+        """Attack Behaviour"""
 
     def die(self, scene):
         self.die_effect()
@@ -179,15 +155,150 @@ class Enemy(arcade.Sprite):
 
     def show_hp(self):
         if self.hp != self.max_hp:
-            hp_bar = gui.IndicatorBar(self.center_x, self.center_y - 70 * self.modify_bar_pos_y, "sprites/gui/bars/Bar.png",
-                                      100 * self.modify_bar_scale, 16 * self.modify_bar_scale, 2 * self.modify_bar_scale)
+            hp_bar = gui.IndicatorBar(self.center_x, self.center_y - 70 * self.modify_bar_pos_y,
+                                      "sprites/gui/bars/Bar.png",
+                                      100 * self.modify_bar_scale, 16 * self.modify_bar_scale,
+                                      2 * self.modify_bar_scale)
             hp_bar.fullness = self.hp / self.max_hp
             hp_bar.draw()
 
 
-class Slime(Enemy):
+class CloseRangeEnemy(Enemy):
+    def __init__(self, name, pos_x, pos_y,
+                 min_coin_drop=0, max_coin_drop=0,
+                 hp=1, defence=1, dodge=1, move_speed=1.0,
+                 attack_damage=1, attack_cooldown=1,
+                 drop=None):
+        super().__init__(name, pos_x, pos_y, min_coin_drop, max_coin_drop, hp, defence, dodge, move_speed,
+                         attack_damage, attack_cooldown, drop)
+
+    def attack_player(self, gameView):
+        if self.collides_with_sprite(gameView.playerObject):
+            if self.canAttack:
+                self.canAttack = False
+                self._attack_cooldown_counter = self.attack_cooldown
+                gameView.playerObject.damage(self.attack_damage)
+    def move_to_player(self, playerObject, physics_engine):
+        self._time_move_counter = 0
+        self.ifMoving = True
+        self._time_move_counter -= 1 / 60
+        if int(self._time_move_counter) % 2 == 0 and self.distance > 15:
+            if self.distance < 500:
+                self._time_move_counter = 0
+
+            if self._time_move_counter <= 0:
+                self._time_move_counter = self._optimization_time
+                delta_y = playerObject.center_y - self.center_y
+                delta_x = playerObject.center_x - self.center_x
+
+                if abs(delta_y) > abs(delta_x):
+                    if delta_y > 0:
+                        self._move_force = (0, self.move_speed)
+                    elif delta_y < 0:
+                        self._move_force = (0, -self.move_speed)
+                else:
+                    if delta_x > 0:
+                        self._move_force = (self.move_speed, 0)
+                        self.direction_move = "Left"
+                    elif delta_x < 0:
+                        self._move_force = (-self.move_speed, 0)
+                        self.direction_move = "Right"
+
+        physics_engine.apply_force(self, self._move_force)
+
+
+class Bullet(arcade.Sprite):
+    def __init__(self, sprite, bullet_speed, damage, distance, startPos):
+        super().__init__(filename=sprite, scale=0.5)
+        self.position = startPos
+        self.start_pos = self.position
+        self.change_x = bullet_speed * 10
+        self.change_y = bullet_speed * 10
+        self.distance = distance
+        self.bullet_speed = bullet_speed
+        self.damage = damage
+
+    def move(self, scene, delta_time: float = 1 / 60):
+        self.position = (
+            self.center_x + self.change_x * delta_time,
+            self.center_y + self.change_y * delta_time,
+        )
+        if arcade.get_distance(self.center_x, self.center_y, self.start_pos[0], self.start_pos[1]) > self.distance:
+            self.kill()
+        if arcade.check_for_collision(self, scene.get_sprite_list("Player")[0]):
+            scene.get_sprite_list("Player")[0].damage(self.damage)
+            self.kill()
+
+    def shoot(self, pos):
+        x, y = pos
+        diff_x = x - self.center_x
+        diff_y = y - self.center_y
+        angle = math.atan2(diff_y, diff_x)
+        angle_deg = math.degrees(angle)
+        if angle_deg < 0:
+            angle_deg += 360
+        self.angle = angle_deg
+
+        self.change_x = math.cos(angle) * self.bullet_speed
+        self.change_y = math.sin(angle) * self.bullet_speed
+
+
+class LongRangeEnemy(Enemy):
+    def __init__(self, name, pos_x, pos_y,
+                 min_coin_drop=0, max_coin_drop=0,
+                 hp=1, defence=1, dodge=1, move_speed=1.0,
+                 attack_damage=1, attack_cooldown=1, attack_range=1, bullet_speed=1.0, bullet_texture=None,
+                 drop=None):
+        super().__init__(name, pos_x, pos_y, min_coin_drop, max_coin_drop, hp, defence, dodge, move_speed,
+                         attack_damage, attack_cooldown, drop)
+        self.attack_range = attack_range * 300
+        self.bullet_texture = bullet_texture
+        self.bullet_speed = bullet_speed
+
+    def attack_player(self, gameView):
+        if self.distance <= self.attack_range:
+            if self.canAttack:
+                self.canAttack = False
+                self._attack_cooldown_counter = self.attack_cooldown
+                b = Bullet(self.bullet_texture, 300 * self.bullet_speed, self.attack_damage, self.attack_range*1.5, self.position)
+                b.shoot(gameView.playerObject.position)
+                gameView.scene.add_sprite("Bullets", b)
+
+    def move_to_player(self, playerObject, physics_engine):
+        self._time_move_counter = 0
+        self._time_move_counter -= 1 / 60
+        if int(self._time_move_counter) % 2 == 0:
+            self.ifMoving = True
+            if self.distance < 500:
+                self._time_move_counter = 0
+
+            if self._time_move_counter <= 0:
+                self._time_move_counter = self._optimization_time
+                delta_y = playerObject.center_y - self.center_y
+                delta_x = playerObject.center_x - self.center_x
+
+                if abs(delta_y) > abs(delta_x):
+                    if delta_y > 0:
+                        self._move_force = (0, self.move_speed)
+                    elif delta_y < 0:
+                        self._move_force = (0, -self.move_speed)
+                else:
+                    if delta_x > 0:
+                        self._move_force = (self.move_speed, 0)
+                        self.direction_move = "Left"
+                    elif delta_x < 0:
+                        self._move_force = (-self.move_speed, 0)
+                        self.direction_move = "Right"
+        else:
+            self.ifMoving = False
+        if self.distance > self.attack_range * 0.75:
+            physics_engine.apply_force(self, self._move_force)
+
+
+class Slime(CloseRangeEnemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=4, max_coin_drop=5, hp=5, defence=0, dodge=10, move_speed=1.5,
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=4, max_coin_drop=5, hp=5, defence=0,
+                         dodge=10, move_speed=1.5,
                          attack_damage=5)
         self.name = "Slime"
         self.move_time_interval = 0.2
@@ -195,9 +306,10 @@ class Slime(Enemy):
         self.modify_bar_pos_y = 0.4
 
 
-class SlimeMedium(Enemy):
+class SlimeMedium(CloseRangeEnemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10, defence=5, dodge=5,
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10, defence=5,
+                         dodge=5,
                          move_speed=1.25,
                          attack_damage=7, attack_cooldown=1.5)
         self.name = "Slime"
@@ -205,13 +317,14 @@ class SlimeMedium(Enemy):
         self.scale = 1.25
 
     def die_effect(self):
-        self.scene.add_sprite("Enemies", Slime(self.center_x+20, self.center_y+20))
-        self.scene.add_sprite("Enemies", Slime(self.center_x-20, self.center_y-20))
+        self.scene.add_sprite("Enemies", Slime(self.center_x + 20, self.center_y + 20))
+        self.scene.add_sprite("Enemies", Slime(self.center_x - 20, self.center_y - 20))
 
 
-class SlimeBig(Enemy):
+class SlimeBig(CloseRangeEnemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=15, max_coin_drop=20, hp=20, defence=10, dodge=3,
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=15, max_coin_drop=20, hp=20, defence=10,
+                         dodge=3,
                          move_speed=0.75,
                          attack_damage=12, attack_cooldown=2)
         self.name = "Slime"
@@ -220,5 +333,17 @@ class SlimeBig(Enemy):
         self.modify_bar_pos_y = 0.7
 
     def die_effect(self):
-        self.scene.add_sprite("Enemies", SlimeMedium(self.center_x+20, self.center_y+20))
-        self.scene.add_sprite("Enemies", SlimeMedium(self.center_x-20, self.center_y-20))
+        self.scene.add_sprite("Enemies", SlimeMedium(self.center_x + 20, self.center_y + 20))
+        self.scene.add_sprite("Enemies", SlimeMedium(self.center_x - 20, self.center_y - 20))
+
+
+class Skeleton(LongRangeEnemy):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10, defence=5,
+                         dodge=5,
+                         move_speed=1.25,
+                         attack_damage=7, attack_cooldown=1.5,
+                         attack_range=2, bullet_speed=1.5, bullet_texture="sprites/weapons/bullets/arrow.png")
+        self.name = "Slime"
+        self.move_time_interval = 0.2
+
