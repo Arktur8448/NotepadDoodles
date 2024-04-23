@@ -132,18 +132,20 @@ class GameView(arcade.View):
 
         self.waveManager.get_wave(2).add_enemy(enemies.Slime)
         self.waveManager.get_wave(2).add_enemy(enemies.SlimeMedium)
+        self.waveManager.get_wave(2).add_enemy(enemies.SkeletonArcher)
         self.waveManager.get_wave(2).add_enemy(enemies.Skeleton)
 
         self.waveManager.get_wave(3).add_enemy(enemies.Skeleton)
         self.waveManager.get_wave(3).add_enemy(enemies.SlimeMedium)
         self.waveManager.get_wave(3).add_enemy(enemies.SlimeBig)
+        self.waveManager.get_wave(3).add_enemy(enemies.SkeletonArcher)
 
         self.waveManager.get_wave(4).add_enemy(enemies.SlimeMedium)
         self.waveManager.get_wave(4).add_enemy(enemies.SlimeBig)
-        self.waveManager.get_wave(4).add_enemy(enemies.Skeleton)
+        self.waveManager.get_wave(4).add_enemy(enemies.SkeletonArcher)
 
         self.waveManager.get_wave(5).add_enemy(enemies.SlimeBig)
-        self.waveManager.get_wave(5).add_enemy(enemies.Skeleton)
+        self.waveManager.get_wave(5).add_enemy(enemies.SkeletonArcher)
 
     def on_draw(self):
         self.clear()
@@ -238,12 +240,23 @@ class GameView(arcade.View):
             del self.playerObject.keys[arcade.key.ESCAPE]
             self.window.show_view(PauseView(self))
 
-        if arcade.key.K in self.playerObject.keys:
-            del self.playerObject.keys[arcade.key.K]
-            random.choice(self.scene.get_sprite_list("Enemies")).damage(100)
-        if arcade.key.L in self.playerObject.keys:
-            del self.playerObject.keys[arcade.key.L]
-            self.waveManager.current_wave.completed = True
+        if 96 in self.playerObject.keys:
+            if arcade.key.K in self.playerObject.keys:
+                # del self.playerObject.keys[arcade.key.K]
+                self.waveManager.current_wave.enemy_cooldown_spawner = 0
+            if arcade.key.L in self.playerObject.keys:
+                del self.playerObject.keys[arcade.key.L]
+                self.waveManager.current_wave.completed = True
+            if arcade.key.J in self.playerObject.keys:
+                del self.playerObject.keys[arcade.key.J]
+                self.playerObject.max_hp = 99999
+                self.playerObject.hp = 99999
+                self.playerObject.max_stamina = 99999
+                self.playerObject.stamina = 99999
+                self.playerObject.dash_cooldown = 0
+                for w in self.playerObject.weapons:
+                    w.speed = 0
+
         if arcade.key.E in self.playerObject.keys:
             del self.playerObject.keys[arcade.key.E]
             for i in range(0, 20):

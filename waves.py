@@ -58,7 +58,7 @@ class Wave:
         self.time = 120
         self.enemies = []
         self._default_enemy_cooldown_spawner = cooldown_spawn
-        self._enemy_cooldown_spawner = 0
+        self.enemy_cooldown_spawner = 0
         self.completed = False
 
     def add_enemy(self, enemy):
@@ -70,9 +70,9 @@ class Wave:
             if self.time <= 0 or len(self.enemies) == 0:
                 self.end_wave(scene)
 
-            self._enemy_cooldown_spawner -= 1 / 60
-            if self._enemy_cooldown_spawner <= 0:
-                self._enemy_cooldown_spawner = random.randint(self._default_enemy_cooldown_spawner/2 * 10000, self._default_enemy_cooldown_spawner * 10000) / 10000
+            self.enemy_cooldown_spawner -= 1 / 60
+            if self.enemy_cooldown_spawner <= 0:
+                self.enemy_cooldown_spawner = random.randint(self._default_enemy_cooldown_spawner/2 * 10000, self._default_enemy_cooldown_spawner * 10000) / 10000
                 enemy = random.choice(self.enemies)
                 playerObject = scene.get_sprite_list("Player")[0]
 

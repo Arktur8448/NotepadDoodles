@@ -55,17 +55,24 @@ class Enemy(arcade.Sprite):
 
     def _load_textures(self):
         self.move_left = []
-        for i in range(1, 6):
-            self.move_left.append(
-                arcade.load_texture(f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_walk_{i}.png"))
+        for i in range(1, 32):
+            try:
+                self.move_left.append(
+                    arcade.load_texture(f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_walk_{i}.png"))
+            except FileNotFoundError:
+                break
         self.move_right = []
         for i in range(1, 6):
-            self.move_right.append(
-                arcade.load_texture(f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_walk_{i}.png",
-                                    flipped_horizontally=True))
+            try:
+                self.move_right.append(
+                    arcade.load_texture(f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_walk_{i}.png",
+                                        flipped_horizontally=True))
+            except FileNotFoundError:
+                break
 
         self.move_animation_count = len(self.move_right)
         self.idle_texture = arcade.load_texture(f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_base.png")
+        self.idle_texture_flip = arcade.load_texture(f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_base.png", flipped_horizontally=True)
 
     def update_enemy(self, gameView):
         self.scene = gameView.scene
@@ -102,7 +109,10 @@ class Enemy(arcade.Sprite):
                 else:
                     self.texture = self.move_left[self._cur_texture]
             else:
-                self.texture = self.idle_texture
+                if self.direction_move == "Right":
+                    self.texture = self.idle_texture_flip
+                else:
+                    self.texture = self.idle_texture
 
             def _hit_animation():
                 self.color = (255, 255, 255, self._alpha_counter)
@@ -178,6 +188,7 @@ class CloseRangeEnemy(Enemy):
                 self.canAttack = False
                 self._attack_cooldown_counter = self.attack_cooldown
                 gameView.playerObject.damage(self.attack_damage)
+
     def move_to_player(self, playerObject, physics_engine):
         self._time_move_counter = 0
         self.ifMoving = True
@@ -260,7 +271,8 @@ class LongRangeEnemy(Enemy):
             if self.canAttack:
                 self.canAttack = False
                 self._attack_cooldown_counter = self.attack_cooldown
-                b = Bullet(self.bullet_texture, 300 * self.bullet_speed, self.attack_damage, self.attack_range*1.5, self.position)
+                b = Bullet(self.bullet_texture, 300 * self.bullet_speed, self.attack_damage, self.attack_range * 1.5,
+                           self.position)
                 b.shoot(gameView.playerObject.position)
                 gameView.scene.add_sprite("Bullets", b)
 
@@ -268,7 +280,6 @@ class LongRangeEnemy(Enemy):
         self._time_move_counter = 0
         self._time_move_counter -= 1 / 60
         if int(self._time_move_counter) % 2 == 0:
-            self.ifMoving = True
             if self.distance < 500:
                 self._time_move_counter = 0
 
@@ -292,6 +303,7 @@ class LongRangeEnemy(Enemy):
         else:
             self.ifMoving = False
         if self.distance > self.attack_range * 0.75:
+            self.ifMoving = True
             physics_engine.apply_force(self, self._move_force)
 
 
@@ -300,7 +312,6 @@ class Slime(CloseRangeEnemy):
         super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=4, max_coin_drop=5, hp=5, defence=0,
                          dodge=10, move_speed=1.5,
                          attack_damage=5)
-        self.name = "Slime"
         self.move_time_interval = 0.2
         self.scale = 0.8
         self.modify_bar_pos_y = 0.4
@@ -312,7 +323,6 @@ class SlimeMedium(CloseRangeEnemy):
                          dodge=5,
                          move_speed=1.25,
                          attack_damage=7, attack_cooldown=1.5)
-        self.name = "Slime"
         self.move_time_interval = 0.2
         self.scale = 1.25
 
@@ -327,7 +337,6 @@ class SlimeBig(CloseRangeEnemy):
                          dodge=3,
                          move_speed=0.75,
                          attack_damage=12, attack_cooldown=2)
-        self.name = "Slime"
         self.move_time_interval = 0.2
         self.scale = 1.5
         self.modify_bar_pos_y = 0.7
@@ -337,13 +346,21 @@ class SlimeBig(CloseRangeEnemy):
         self.scene.add_sprite("Enemies", SlimeMedium(self.center_x - 20, self.center_y - 20))
 
 
-class Skeleton(LongRangeEnemy):
+class Skeleton(CloseRangeEnemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10, defence=5,
+        super().__init__(name="skeleton", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10, defence=5,
+                         dodge=5,
+                         move_speed=1.25,
+                         attack_damage=7)
+        self.move_time_interval = 0.5
+
+
+class SkeletonArcher(LongRangeEnemy):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(name="skeleton_archer", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10, defence=5,
                          dodge=5,
                          move_speed=1.25,
                          attack_damage=7, attack_cooldown=1.5,
                          attack_range=2, bullet_speed=1.5, bullet_texture="sprites/weapons/bullets/arrow.png")
-        self.name = "Slime"
-        self.move_time_interval = 0.2
+        self.move_time_interval = 0.5
 

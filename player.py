@@ -31,9 +31,6 @@ class Player(arcade.Sprite):
         self.dash_last_time = time.perf_counter() - self.dash_cooldown
         self.isDashing = False
 
-        self.last_time_slash = 0
-        self.slash_cooldown_time = 0
-
         self.keys = {}
 
         self.direction_move = "Down"
@@ -257,17 +254,17 @@ class Player(arcade.Sprite):
             piorun.center_x = self.center_x - 42
             piorun.center_y = self.center_y + 70
             piorun.draw()
-            stamina = arcade.Text(
-                f"{int(self.stamina)}/{int(self.max_stamina)}",
-                self.center_x,
-                self.center_y + 65,
-                arcade.color.BLACK,
-                10,
-                anchor_x="center",
-                font_name="First Time Writing!",
-                bold=True
-            )
-            stamina.draw()
+        #     stamina = arcade.Text(
+        #         f"{int(self.stamina)}/{int(self.max_stamina)}",
+        #         self.center_x,
+        #         self.center_y + 65,
+        #         arcade.color.BLACK,
+        #         10,
+        #         anchor_x="center",
+        #         font_name="First Time Writing!",
+        #         bold=True
+        #     )
+        #     stamina.draw()
         elif self.stamina < 0:
             stamina_bar = gui.IndicatorBar(self.center_x, self.center_y + 70, "sprites/gui/bars/Bar.png", 80, 14, 2)
             stamina_bar.fullness = 0
@@ -276,17 +273,17 @@ class Player(arcade.Sprite):
             piorun.center_x = self.center_x - 42
             piorun.center_y = self.center_y + 70
             piorun.draw()
-            stamina = arcade.Text(
-                f"{0}/{int(self.max_stamina)}",
-                self.center_x,
-                self.center_y + 65,
-                arcade.color.BLACK,
-                10,
-                anchor_x="center",
-                font_name="First Time Writing!",
-                bold=True
-            )
-            stamina.draw()
+        #     stamina = arcade.Text(
+        #         f"{0}/{int(self.max_stamina)}",
+        #         self.center_x,
+        #         self.center_y + 65,
+        #         arcade.color.BLACK,
+        #         10,
+        #         anchor_x="center",
+        #         font_name="First Time Writing!",
+        #         bold=True
+        #     )
+        #     stamina.draw()
         if self.hp != self.max_hp:
             hp_bar = gui.IndicatorBar(self.center_x, self.center_y - 70,"sprites/gui/bars/Bar.png", 100, 16, 2)
             hp_bar.fullness = self.hp / self.max_hp
@@ -295,17 +292,18 @@ class Player(arcade.Sprite):
             heart.center_x = self.center_x - 50
             heart.center_y = self.center_y - 65
             heart.draw()
-            hp = arcade.Text(
-                f"{int(self.hp)}/{int(self.max_hp)}",
-                self.center_x,
-                self.center_y - 75,
-                arcade.color.BLACK,
-                10,
-                anchor_x="center",
-                font_name="First Time Writing!",
-                bold=True
-            )
-            hp.draw()
+            # hp = arcade.Text(
+            #     f"{int(self.hp)}/{int(self.max_hp)}",
+            #     self.center_x,
+            #     self.center_y - 75,
+            #     arcade.color.BLACK,
+            #     10,
+            #     anchor_x="center",
+            #     font_name="First Time Writing!",
+            #     bold=True
+            # )
+            # hp.draw()
+        pass
 
     def _setup_character(self):
         self.character.apply_multiplayer(self)
