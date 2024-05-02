@@ -12,7 +12,7 @@ import gui
 import json
 
 # pyinstaller --onefile --noconsole --icon=icon.ico main.py
-# python -m nuitka --mingw64 main.py --windows-icon-from-ico="icon.ico" --disable-console --onefile --include-data-dir=/fonts --include-data dir=/maps  --include-data dir=/sprites
+# python -m nuitka --mingw64 main.py --windows-icon-from-ico="icon.ico" --disable-console --onefile
 # TODO
 # Abilities
 # fast slash
@@ -41,7 +41,7 @@ except FileNotFoundError:
 
 class GameWindow(arcade.Window):
     def __init__(self, width, height, title):
-        super().__init__(width, height, title, fullscreen=True, antialiasing=True, vsync=settings.get("vsync"))
+        super().__init__(width, height, title, fullscreen=True, antialiasing=True, vsync=settings.get("vsync"), )
         arcade.load_font("fonts/FirstTimeWriting.ttf")
         self.playerObject = None
 
@@ -125,7 +125,7 @@ class GameView(arcade.View):
         except:
             pass
 
-        self.waveManager = waves.WaveManager(5, spawn_cooldown_change=-0.25)
+        self.waveManager = waves.WaveManager(self, 5, spawn_cooldown_change=-0.25)
 
         self.waveManager.get_wave(1).add_enemy(enemies.Slime)
         self.waveManager.get_wave(1).add_enemy(enemies.Skeleton)
@@ -246,7 +246,7 @@ class GameView(arcade.View):
                 self.waveManager.current_wave.enemy_cooldown_spawner = 0
             if arcade.key.L in self.playerObject.keys:
                 del self.playerObject.keys[arcade.key.L]
-                self.waveManager.current_wave.completed = True
+                self.waveManager.current_wave.end_wave(self.scene)
             if arcade.key.J in self.playerObject.keys:
                 del self.playerObject.keys[arcade.key.J]
                 self.playerObject.max_hp = 99999

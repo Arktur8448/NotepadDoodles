@@ -147,7 +147,7 @@ class StickMan(Character):
         self.name = "StickMan"
         self.desc = "The most well rounded character with basic skills and powers"
         super().__init__(self.name, self.desc)
-        self.starter_weapons = [items.Weapon("sprites/gui/bars/Bar.png", "Sword", damage=10)]
+        self.starter_weapons = [items.Weapon("sprites/items/weapons/sword.png", "Sword", damage=10)]
 
 
 class Golem(Character):
@@ -159,7 +159,7 @@ class Golem(Character):
                          base_movement_speed=0.5, base_agility=0.25, base_dodge=0, base_strength=2)
         self.detailed_desc_addition = "Cannot Sprint or Dash or Dodge\nCannot regenerate any stamina"
         self.starter_weapons = [
-            items.Weapon("sprites/gui/bars/Bar.png", "Great Sword", damage=20, speed=2, attack_range=2, slash_scale=2)]
+            items.Weapon("sprites/items/weapons/greatSword.png", "Great Sword", damage=20, speed=2, attack_range=2, slash_scale=2)]
 
     def character_skills(self, playerObject):
         playerObject.stamina = 0
@@ -190,7 +190,7 @@ class Ranger(Character):
                          base_accuracy=2, base_dodge=2, base_agility=1.25, base_strength=0)
         self.detailed_desc_addition = "Cannot use close-range weapons"
         self.starter_weapons = [
-            items.RangedWeapon("sprites/gui/bars/Bar.png", "sprites/weapons/bullets/arrow.png", "Bow", damage=15,
+            items.RangedWeapon("sprites/gui/bars/Bar.png", "sprites/items/weapons/bullets/arrow.png", "Bow", damage=15,
                                speed=1.5, attack_range=2)]
 
     def character_skills(self, playerObject):
@@ -207,7 +207,7 @@ class Wizard(Character):
                          base_dodge=1.25, base_agility=2, base_strength=0, base_accuracy=0)
         self.detailed_desc_addition = "Cannot use close range weapons\nCannot use ranged weapons"
         self.starter_weapons = [
-            items.Wand("sprites/gui/bars/Bar.png", "sprites/weapons/bullets/magic_bullet.png", "Wand", damage=10, speed=1, attack_range=2)]
+            items.Wand("sprites/gui/bars/Bar.png", "sprites/items/weapons/bullets/magic_bullet.png", "Wand", damage=10, speed=1, attack_range=2)]
 
     def character_skills(self, playerObject):
         playerObject.strength = 0
@@ -225,4 +225,4 @@ class Thief(Character):
                          base_dash_duration=0.25,
                          base_dodge=1.5, base_defence=0.2, base_agility=1.25, base_strength=0.75, base_accuracy=1.25)
         self.starter_weapons = [
-            items.Weapon("sprites/gui/bars/Bar.png", "Dagger", damage=7, speed=0.5, attack_range=0.75)]
+            items.Weapon("sprites/items/weapons/dagger.png", "Dagger", damage=7, speed=0.5, attack_range=0.75)]
