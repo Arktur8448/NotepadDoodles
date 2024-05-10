@@ -14,12 +14,10 @@ import json
 # pyinstaller --onefile --noconsole --icon=icon.ico main.py
 # python -m nuitka --mingw64 main.py --windows-icon-from-ico="icon.ico" --disable-console --onefile
 # TODO
-# Abilities
-# fast slash
-# blind shoot
-# boom
-# coin throw
-
+# Shop
+# losowqanie itemów z bazy do sklepu
+# sloty na broń
+# sprzedawanie eq
 
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 MAP_WIDTH = 3950
@@ -41,7 +39,7 @@ except FileNotFoundError:
 
 class GameWindow(arcade.Window):
     def __init__(self, width, height, title):
-        super().__init__(width, height, title, fullscreen=True, antialiasing=True, vsync=settings.get("vsync"), )
+        super().__init__(width, height, title, fullscreen=True, antialiasing=True, vsync=settings.get("vsync"))
         arcade.load_font("fonts/FirstTimeWriting.ttf")
         self.playerObject = None
 
@@ -56,10 +54,6 @@ class GameWindow(arcade.Window):
             del self.playerObject.keys[key]
         except:
             pass
-
-    def on_resize(self, width: float, height: float):
-        global SCREEN_WIDTH, SCREEN_HEIGHT
-        SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 
 
 class GameView(arcade.View):
@@ -324,7 +318,7 @@ class PauseView(arcade.View):
         self.camera.use()
         arcade.draw_rectangle_filled(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT, (0, 0, 0, 150))
 
-        self.scene.draw()
+        self.scene.draw(pixelated=True)
 
         pause = arcade.Text(
             f"PAUSE",
@@ -346,13 +340,16 @@ class PauseView(arcade.View):
             self.un_pause()
 
     def un_pause(self, event=None):
-        self.window.show_view(self.game_view)
+        if self.window.current_view is self:
+            self.window.show_view(self.game_view)
 
     def main_menu(self, event=None):
-        self.window.show_view(MainMenuView())
+        if self.window.current_view is self:
+            self.window.show_view(MainMenuView())
 
     def show_settings(self, event=None):
-        self.window.show_view(SettingsView(self))
+        if self.window.current_view is self:
+            self.window.show_view(SettingsView(self))
 
 
 class SettingsView(arcade.View):
@@ -439,7 +436,7 @@ class SettingsView(arcade.View):
         self.clear()
         self.camera.use()
 
-        self.scene.draw()
+        self.scene.draw(pixelated=True)
         text = arcade.Text(
             "SETTINGS",
             SCREEN_WIDTH / 2 + 60,
@@ -458,26 +455,28 @@ class SettingsView(arcade.View):
         self.window.show_view(self.back_view)
 
     def toggle_vsync(self, event=None):
-        if self.vsync_text == "X":
-            self.vsync_text = ""
-            self.window.set_vsync(False)
-            settings["vsync"] = False
-        else:
-            self.vsync_text = "X"
-            self.window.set_vsync(True)
-            settings["vsync"] = True
-        self.generate_buttons()
-        self.save_settings()
+        if self.window.current_view is self:
+            if self.vsync_text == "X":
+                self.vsync_text = ""
+                self.window.set_vsync(False)
+                settings["vsync"] = False
+            else:
+                self.vsync_text = "X"
+                self.window.set_vsync(True)
+                settings["vsync"] = True
+            self.generate_buttons()
+            self.save_settings()
 
     def toggle_fps(self, event=None):
-        if self.fps_text == "X":
-            self.fps_text = ""
-            settings["showFps"] = False
-        else:
-            self.fps_text = "X"
-            settings["showFps"] = True
-        self.generate_buttons()
-        self.save_settings()
+        if self.window.current_view is self:
+            if self.fps_text == "X":
+                self.fps_text = ""
+                settings["showFps"] = False
+            else:
+                self.fps_text = "X"
+                settings["showFps"] = True
+            self.generate_buttons()
+            self.save_settings()
 
     def save_settings(self):
         with open("SETTINGS.json", 'w') as file:
@@ -530,7 +529,7 @@ class MainMenuView(arcade.View):
         self.clear()
         self.camera.use()
 
-        self.scene.draw()
+        self.scene.draw(pixelated=True)
 
         notepad = arcade.Text(
             f"NOTEPAD",
@@ -558,14 +557,17 @@ class MainMenuView(arcade.View):
         self.manager.draw()
 
     def start(self, event=None):
-        charactersView = CharacterView()
-        self.window.show_view(charactersView)
+        if self.window.current_view is self:
+            charactersView = CharacterView()
+            self.window.show_view(charactersView)
 
     def exit(self, event=None):
-        arcade.exit()
+        if self.window.current_view is self:
+            arcade.exit()
 
     def show_settings(self, event=None):
-        self.window.show_view(SettingsView(self))
+        if self.window.current_view is self:
+            self.window.show_view(SettingsView(self))
 
 
 class CharacterView(arcade.View):
@@ -596,14 +598,14 @@ class CharacterView(arcade.View):
             gui.CharacterCard(320, SCREEN_HEIGHT - 350, characters.StickMan(), self),
             gui.CharacterCard(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 350, characters.Golem(), self),
             gui.CharacterCard(SCREEN_WIDTH - 320, SCREEN_HEIGHT - 350, characters.Warrior(), self),
-            gui.CharacterCard(320, 250, characters.Ranger(), self, desc_font_size_scale=0.90),
+            gui.CharacterCard(320, 250, characters.Ranger(), self),
             gui.CharacterCard(SCREEN_WIDTH / 2, 250, characters.Wizard(), self),
             gui.CharacterCard(SCREEN_WIDTH - 320, 250, characters.Thief(), self),
         ]
 
     def on_draw(self):
         self.clear()
-        self.scene.draw()
+        self.scene.draw(pixelated=True)
         for c in self.characters:
             c.draw()
 
@@ -621,12 +623,14 @@ class CharacterView(arcade.View):
         self.manager.draw()
 
     def show_main_menu(self, event=None):
-        self.window.show_view(MainMenuView())
+        if self.window.current_view is self:
+            self.window.show_view(MainMenuView())
 
     def play(self, character):
-        gameView = GameView(pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2, character))
-        gameView.setup()
-        self.window.show_view(gameView)
+        if self.window.current_view is self:
+            gameView = GameView(pl.Player("sprites/player/stickman/player_idle_1.png", 1280 * 2, 1280 * 2, character))
+            gameView.setup()
+            self.window.show_view(gameView)
 
 
 def main():

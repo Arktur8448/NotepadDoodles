@@ -153,7 +153,5 @@ class Wave:
                 scene.add_sprite("Enemies", enemy(x, y))
 
     def end_wave(self, scene):
-        enemies = scene.get_sprite_list("Enemies")
-        for e in enemies:
-            e.kill()
+        scene.get_sprite_list("Enemies").clear()
         self.completed = True

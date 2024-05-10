@@ -7,7 +7,7 @@ import fight
 
 
 class Enemy(arcade.Sprite):
-    def __init__(self, name, pos_x, pos_y, min_coin_drop=0, max_coin_drop=0, hp=1, defence=1, dodge=1, move_speed=1.0,
+    def __init__(self, name, pos_x, pos_y, min_coin_drop=0, max_coin_drop=0, hp=1, move_speed=1.0,
                  attack_damage=1.0, attack_cooldown=1.0, drop=None):
         super().__init__(filename=f"sprites/enemies/{name.lower()}/{name.lower()}_base.png", center_x=pos_x,
                          center_y=pos_y, scale=1)
@@ -16,8 +16,6 @@ class Enemy(arcade.Sprite):
         self.hp = hp
         self.max_hp = self.hp
 
-        self.defence = defence
-        self.dodge = dodge
         self.move_speed = move_speed * 3000
 
         self.coin_drop = random.randint(min_coin_drop, max_coin_drop)
@@ -72,7 +70,8 @@ class Enemy(arcade.Sprite):
 
         self.move_animation_count = len(self.move_right)
         self.idle_texture = arcade.load_texture(f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_base.png")
-        self.idle_texture_flip = arcade.load_texture(f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_base.png", flipped_horizontally=True)
+        self.idle_texture_flip = arcade.load_texture(
+            f"sprites/enemies/{self.name.lower()}/{self.name.lower()}_base.png", flipped_horizontally=True)
 
     def update_enemy(self, gameView):
         self.scene = gameView.scene
@@ -176,10 +175,10 @@ class Enemy(arcade.Sprite):
 class CloseRangeEnemy(Enemy):
     def __init__(self, name, pos_x, pos_y,
                  min_coin_drop=0, max_coin_drop=0,
-                 hp=1, defence=1, dodge=1, move_speed=1.0,
+                 hp=1, move_speed=1.0,
                  attack_damage=1, attack_cooldown=1,
                  drop=None):
-        super().__init__(name, pos_x, pos_y, min_coin_drop, max_coin_drop, hp, defence, dodge, move_speed,
+        super().__init__(name, pos_x, pos_y, min_coin_drop, max_coin_drop, hp, move_speed,
                          attack_damage, attack_cooldown, drop)
 
     def attack_player(self, gameView):
@@ -257,10 +256,10 @@ class Bullet(arcade.Sprite):
 class LongRangeEnemy(Enemy):
     def __init__(self, name, pos_x, pos_y,
                  min_coin_drop=0, max_coin_drop=0,
-                 hp=1, defence=1, dodge=1, move_speed=1.0,
+                 hp=1, move_speed=1.0,
                  attack_damage=1, attack_cooldown=1, attack_range=1, bullet_speed=1.0, bullet_texture=None,
                  drop=None):
-        super().__init__(name, pos_x, pos_y, min_coin_drop, max_coin_drop, hp, defence, dodge, move_speed,
+        super().__init__(name, pos_x, pos_y, min_coin_drop, max_coin_drop, hp, move_speed,
                          attack_damage, attack_cooldown, drop)
         self.attack_range = attack_range * 300
         self.bullet_texture = bullet_texture
@@ -309,8 +308,8 @@ class LongRangeEnemy(Enemy):
 
 class Slime(CloseRangeEnemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=4, max_coin_drop=5, hp=5, defence=0,
-                         dodge=10, move_speed=1.5,
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=4, max_coin_drop=5, hp=5,
+                         move_speed=1.5,
                          attack_damage=5)
         self.move_time_interval = 0.2
         self.scale = 0.8
@@ -319,8 +318,7 @@ class Slime(CloseRangeEnemy):
 
 class SlimeMedium(CloseRangeEnemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10, defence=5,
-                         dodge=5,
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10,
                          move_speed=1.25,
                          attack_damage=7, attack_cooldown=1.5)
         self.move_time_interval = 0.2
@@ -333,8 +331,7 @@ class SlimeMedium(CloseRangeEnemy):
 
 class SlimeBig(CloseRangeEnemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=15, max_coin_drop=20, hp=20, defence=10,
-                         dodge=3,
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=15, max_coin_drop=20, hp=20,
                          move_speed=0.75,
                          attack_damage=12, attack_cooldown=2)
         self.move_time_interval = 0.2
@@ -348,8 +345,8 @@ class SlimeBig(CloseRangeEnemy):
 
 class Skeleton(CloseRangeEnemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="skeleton", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10, defence=5,
-                         dodge=5,
+        super().__init__(name="skeleton", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10,
+
                          move_speed=1.25,
                          attack_damage=7)
         self.move_time_interval = 0.5
@@ -357,10 +354,8 @@ class Skeleton(CloseRangeEnemy):
 
 class SkeletonArcher(LongRangeEnemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="skeleton_archer", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10, defence=5,
-                         dodge=5,
+        super().__init__(name="skeleton_archer", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10,
                          move_speed=1.25,
                          attack_damage=7, attack_cooldown=1.5,
-                         attack_range=2, bullet_speed=1.5, bullet_texture="sprites/weapons/bullets/arrow.png")
+                         attack_range=2, bullet_speed=1.5, bullet_texture="sprites/items/weapons/bullets/arrow.png")
         self.move_time_interval = 0.5
-

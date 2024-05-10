@@ -52,9 +52,7 @@ class Player(arcade.Sprite):
         self.stamina_sprint_use = 3  # Per second
 
         self.strength = 100  # Close range
-        self.defence = 100  # Defence and change to block damage
         self.agility = 100  # Magic
-        self.dodge = 100  # Dodge the damage
         self.accuracy = 100  # Ranged
 
         self.cur_texture = 1

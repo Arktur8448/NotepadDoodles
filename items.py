@@ -2,19 +2,16 @@ import arcade
 
 
 class Item(arcade.Sprite):
-    def __init__(self, sprite_path, name, description="", item_rarity="Common", price_buy=1, price_sell=1):
+    def __init__(self, sprite_path, name, price_buy=1):
         super().__init__(filename=sprite_path, scale=1)
         self.name = name
-        self.description = description
-        self.item_rarity = item_rarity
         self.price_buy = price_buy
-        self.price_sell = price_sell
 
 
 class Weapon(Item):
-    def __init__(self, sprite_path, name, description="", item_rarity="Common", price_buy=1, price_sell=1, damage=1,
+    def __init__(self, sprite_path, name, price_buy=1, damage=1,
                  speed=1, attack_range=1, slash_scale=1):
-        super().__init__(sprite_path, name, description, item_rarity, price_buy, price_sell)
+        super().__init__(sprite_path, name, price_buy)
         self.damage = damage
         self.speed = speed
         self._cooldown_counter = 0
@@ -33,9 +30,9 @@ class Weapon(Item):
 
 
 class RangedWeapon(Item):
-    def __init__(self, sprite_path, bullet_path, name, description="", item_rarity="Common", price_buy=1, price_sell=1,
+    def __init__(self, sprite_path, bullet_path, name, price_buy=1,
                  damage=1, speed=1, attack_range=1, bullet_speed=1):
-        super().__init__(sprite_path, name, description, item_rarity, price_buy, price_sell)
+        super().__init__(sprite_path, name, price_buy)
         self.bullet_path = bullet_path
         self.damage = damage
         self.speed = speed
@@ -55,9 +52,9 @@ class RangedWeapon(Item):
 
 
 class Wand(Item):
-    def __init__(self, sprite_path, bullet_path, name, description="", item_rarity="Common", price_buy=1, price_sell=1,
+    def __init__(self, sprite_path, bullet_path, name,  price_buy=1,
                  damage=1, speed=1, attack_range=1, bullet_speed=1):
-        super().__init__(sprite_path, name, description, item_rarity, price_buy, price_sell)
+        super().__init__(sprite_path, name, price_buy)
         self.bullet_path = bullet_path
         self.damage = damage
         self.speed = speed
@@ -74,6 +71,5 @@ class Wand(Item):
     def start_cooldown(self):
         self._cooldown_counter = self.speed
         self.canAttack = False
-
 
 
