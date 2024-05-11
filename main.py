@@ -23,7 +23,14 @@ import json
 # popup menu
 # more wrogów, items , charms , fal 
 
+fullScreen = True
+
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
+if not SCREEN_WIDTH == 1920 and not SCREEN_HEIGHT == 1080:
+    SCREEN_WIDTH = 1920
+    SCREEN_HEIGHT = 1080
+    fullScreen = False
+
 MAP_WIDTH = 3950
 MAP_HEIGHT = 3530
 MAP_START_WIDTH = 1170
@@ -43,7 +50,7 @@ except FileNotFoundError:
 
 class GameWindow(arcade.Window):
     def __init__(self, width, height, title):
-        super().__init__(width, height, title, fullscreen=True, antialiasing=True, vsync=settings.get("vsync"))
+        super().__init__(width, height, title, antialiasing=True, vsync=settings.get("vsync"), center_window=True, fullscreen=fullScreen)
         arcade.load_font("fonts/FirstTimeWriting.ttf")
         self.playerObject = None
 

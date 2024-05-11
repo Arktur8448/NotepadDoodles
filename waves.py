@@ -3,6 +3,9 @@ import arcade
 import shop
 
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
+if not SCREEN_WIDTH == 1920 and not SCREEN_HEIGHT == 1080:
+    SCREEN_WIDTH = 1920
+    SCREEN_HEIGHT = 1080
 DEFAULT_COOLDOWN = 3
 
 
