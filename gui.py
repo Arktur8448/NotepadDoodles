@@ -2,6 +2,8 @@ import arcade
 import arcade.gui
 from typing import Tuple
 
+import items
+
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 
 
@@ -107,6 +109,12 @@ class CharacterCard:
         self.image = arcade.Sprite(f"sprites/player/{self.character.name.lower()}/player_idle_1.png",
                                    center_x=self.border.left + 42 * self.scale, center_y=self.border.top - 52 * self.scale,
                                    image_height=64, image_width=64, scale=self.scale)
+
+        self.scene = arcade.Scene()
+        self.scene.add_sprite_list("All")
+        self.scene.add_sprite("All", self.border)
+        self.scene.add_sprite("All", self.image)
+
         self.name = arcade.Text(
             self.character.name,
             self.image.right + 10 * self.scale,
@@ -141,11 +149,84 @@ class CharacterCard:
         )
 
     def draw(self):
-        self.border.draw()
-        self.image.draw()
+        self.scene.draw(pixelated=True)
         self.name.draw()
         self.desc.draw()
         self.manager.draw()
 
     def start(self, event=None):
         self.view.play(self.character)
+
+
+class ShopCard:
+    def __init__(self, x, y, item, view, scale=1.5):
+        self.scale = scale
+        self.item = item
+        self.view = view
+
+        self.border = arcade.Sprite("sprites/card/border.png", center_x=x, center_y=y, scale=1.25 * self.scale)
+        self.image = arcade.Sprite(texture=self.item.texture,center_x=self.border.left + 100 * self.scale, center_y=self.border.top - 82 * self.scale,
+                                   image_height=128 * self.scale, image_width=128 * self.scale, scale=1.75 * self.scale)
+
+        self.scene = arcade.Scene()
+        self.scene.add_sprite_list("All")
+        self.scene.add_sprite("All", self.border)
+        self.scene.add_sprite("All", self.image)
+
+        self.name = arcade.Text(
+            self.item.name,
+            self.border.right - 150 * self.scale,
+            self.border.top - 60 * self.scale,
+            color=arcade.color.BLACK,
+            font_size=30 * self.scale,
+            font_name="First Time Writing!",
+            bold=True,
+            anchor_x="center"
+        )
+        self.manager = arcade.gui.UIManager()
+        self.manager.enable()
+        buy = Button(350 * self.scale, 80 * self.scale, "BUY", font_size=35 * self.scale)
+        buy.on_click = self.buy
+        self.manager.add(arcade.gui.UIAnchorWidget(
+                anchor_x="left",
+                anchor_y="bottom",
+                align_x=(self.border.left + self.border.width / 2) - buy.width / 2,
+                align_y=self.border.bottom + 20 * self.scale,
+                child=buy)
+        )
+
+        desc = ""
+        if type(self.item) is items.Weapon:
+            desc += f"Damage: {self.item.damage}\n"
+            desc += f"Speed: {self.item.speed}\n"
+            desc += f"Range: {self.item.attack_range}\n"
+
+        elif type(self.item) is items.Wand or type(self.item) is items.RangedWeapon:
+            desc += f"Damage: {self.item.damage}\n"
+            desc += f"Speed: {self.item.speed}\n"
+            desc += f"Range: {self.item.attack_range}\n"
+            desc += f"Bullet Speed: {self.item.bullet_speed}\n"
+
+        self.desc = arcade.Text(
+            desc,
+            self.border.right - 150 * self.scale,
+            self.name.bottom - 25 * self.scale,
+            color=(0, 0, 0, 255),
+            font_size=17 * self.scale,
+            font_name="First Time Writing!",
+            bold=True,
+            width=250 * self.scale,
+            multiline=True,
+            anchor_x="center",
+            align="center"
+        )
+
+    def draw(self):
+        self.scene.draw(pixelated=True)
+        self.name.draw()
+        self.manager.draw()
+        self.desc.draw()
+
+    def buy(self, event=None):
+        if arcade.get_window().current_view is self.view:
+            pass

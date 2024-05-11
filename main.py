@@ -15,9 +15,13 @@ import json
 # python -m nuitka --mingw64 main.py --windows-icon-from-ico="icon.ico" --disable-console --onefile
 # TODO
 # Shop
-# losowqanie itemów z bazy do sklepu
-# sloty na broń
-# sprzedawanie eq
+# wyświetlanie eq
+# kupno
+# sprawdzenie czy ma sie miejsce bron
+# randomowe losowanie itemow
+# artefakty i potki
+# popup menu
+# more wrogów, items , charms , fal 
 
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 MAP_WIDTH = 3950

@@ -1,6 +1,7 @@
 import re
 import arcade
 import gui
+import itemDB
 import items
 
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
@@ -30,6 +31,14 @@ class ShopView(arcade.View):
                 align_y=20,
                 child=v_box)
         )
+        self.itemsToSell =[
+            gui.ShopCard(500 + 250, SCREEN_HEIGHT - 225, itemDB.random_wand(), self, 0.85),
+            gui.ShopCard(SCREEN_WIDTH - 500 - 250, SCREEN_HEIGHT - 225, itemDB.random_wand(), self, 0.85),
+            gui.ShopCard(500 + 250, SCREEN_HEIGHT / 2, itemDB.random_weapon(), self, 0.85),
+            gui.ShopCard(SCREEN_WIDTH - 500 - 250, SCREEN_HEIGHT / 2, itemDB.random_weapon(), self, 0.85),
+            gui.ShopCard(500 + 250, 225, itemDB.random_ranged(), self, 0.85),
+            gui.ShopCard(SCREEN_WIDTH - 500 - 250, 225, itemDB.random_ranged(), self, 0.85),
+        ]
 
     def on_show_view(self):
         self.scene = arcade.Scene()
@@ -97,6 +106,8 @@ class ShopView(arcade.View):
             anchor_x="center"
         )
         shop.draw()
+        for i in self.itemsToSell:
+            i.draw()
 
     def draw_wave(self):
         wave = arcade.Text(
@@ -159,8 +170,7 @@ class ShopView(arcade.View):
         desc += f"Stamina Regen Rate per Second: {self.playerObject.stamina_regen_rate}\n\n"
 
         desc += f"Strength: {self.playerObject.strength}\n"
-        desc += f"Defence: {self.playerObject.defence}\n"
-        desc += f"Dodge: {self.playerObject.dodge}\n"
+        desc += f"Agility: {self.playerObject.agility}\n"
         desc += f"Accuracy: {self.playerObject.accuracy}\n\n"
 
         desc += f"Movement Speed: {self.playerObject.movement_speed / 100}\n"

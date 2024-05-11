@@ -29,7 +29,7 @@ class WaveManager:
                 self.current_wave_number += 1
                 self.current_wave = self.waves[self.current_wave_number]
                 self.gameView.window.show_view(shop.ShopView(self.gameView))
-            except:
+            except IndexError:
                 arcade.exit()
 
     def draw_wave_status(self):
