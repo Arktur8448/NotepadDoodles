@@ -66,6 +66,7 @@ class Player(arcade.Sprite):
         self.sprint_time_interval = 0.3
         self.walk_time_interval = 0.5
 
+        self.inventory = []
         self.weapons = []
 
         self.coins = 0

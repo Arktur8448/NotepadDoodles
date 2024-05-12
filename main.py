@@ -15,13 +15,12 @@ import json
 # python -m nuitka --mingw64 main.py --windows-icon-from-ico="icon.ico" --disable-console --onefile
 # TODO
 # Shop
-# wyświetlanie eq
-# kupno
-# sprawdzenie czy ma sie miejsce bron
-# randomowe losowanie itemow
 # artefakty i potki
-# popup menu
-# more wrogów, items , charms , fal 
+# boss
+# more wrogów, items , charms , fal
+# dzwięki i głośność
+# poziomy trudności
+# win screen
 
 fullScreen = True
 
@@ -130,7 +129,7 @@ class GameView(arcade.View):
         except:
             pass
 
-        self.waveManager = waves.WaveManager(self, 5, spawn_cooldown_change=-0.25)
+        self.waveManager = waves.WaveManager(self, 5, spawn_cooldown_change=0.25)
 
         self.waveManager.get_wave(1).add_enemy(enemies.Slime)
         self.waveManager.get_wave(1).add_enemy(enemies.Skeleton)
@@ -261,6 +260,17 @@ class GameView(arcade.View):
                 self.playerObject.dash_cooldown = 0
                 for w in self.playerObject.weapons:
                     w.speed = 0
+            if arcade.key.G in self.playerObject.keys:
+                del self.playerObject.keys[arcade.key.G]
+                self.playerObject.max_hp = 99999
+                self.playerObject.hp = 99999
+            if arcade.key.T in self.playerObject.keys:
+                del self.playerObject.keys[arcade.key.T]
+                self.playerObject.max_stamina = 99999
+                self.playerObject.stamina = 99999
+            if arcade.key.C in self.playerObject.keys:
+                del self.playerObject.keys[arcade.key.C]
+                self.playerObject.coins += 100
 
         if arcade.key.E in self.playerObject.keys:
             del self.playerObject.keys[arcade.key.E]

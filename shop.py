@@ -19,6 +19,7 @@ class ShopView(arcade.View):
         self.scene = None
         self.camera = None
         self.generate_stats()
+        self.tooltip = None
 
         b = gui.Button(350, 100, "START", 40)
         b.on_click = self.next_wave
@@ -34,13 +35,13 @@ class ShopView(arcade.View):
                 align_y=20,
                 child=v_box)
         )
-        self.itemsToSell =[
-            gui.ShopCard(500 + 250, SCREEN_HEIGHT - 225, itemDB.random_wand(), self, 0.85),
-            gui.ShopCard(SCREEN_WIDTH - 500 - 250, SCREEN_HEIGHT - 225, itemDB.random_wand(), self, 0.85),
-            gui.ShopCard(500 + 250, SCREEN_HEIGHT / 2, itemDB.random_weapon(), self, 0.85),
-            gui.ShopCard(SCREEN_WIDTH - 500 - 250, SCREEN_HEIGHT / 2, itemDB.random_weapon(), self, 0.85),
-            gui.ShopCard(500 + 250, 225, itemDB.random_ranged(), self, 0.85),
-            gui.ShopCard(SCREEN_WIDTH - 500 - 250, 225, itemDB.random_ranged(), self, 0.85),
+        self.itemsToSell = [
+            gui.ShopCard(500 + 250, SCREEN_HEIGHT - 225, itemDB.random_tool(), self, 0.85),
+            gui.ShopCard(SCREEN_WIDTH - 500 - 250, SCREEN_HEIGHT - 225, itemDB.random_tool(), self, 0.85),
+            gui.ShopCard(500 + 250, SCREEN_HEIGHT / 2, itemDB.random_tool(), self, 0.85),
+            gui.ShopCard(SCREEN_WIDTH - 500 - 250, SCREEN_HEIGHT / 2, itemDB.random_tool(), self, 0.85),
+            gui.ShopCard(500 + 250, 225, itemDB.random_tool(), self, 0.85),
+            gui.ShopCard(SCREEN_WIDTH - 500 - 250, 225, itemDB.random_tool(), self, 0.85),
         ]
 
     def on_show_view(self):
@@ -65,16 +66,43 @@ class ShopView(arcade.View):
                                   arcade.Sprite(center_x=SCREEN_WIDTH - 500, center_y=SCREEN_HEIGHT - 100 * r,
                                                 texture=divider))
 
+        self.scene.add_sprite_list("Slots")
+
+        i = 0
+        for r in range(0, 3):
+            for c in range(0, 6):
+                s = gui.Slot(50 + 80 * c, (SCREEN_HEIGHT / 2 - 250) + 80 * r, scale=0.2, index=i)
+                self.scene.add_sprite("Slots", s)
+                i += 1
+        self.scene.add_sprite_list("SlotsW")
+
+        i = 0
+        for c in range(0, 4):
+            s = gui.Slot(70 + 120 * c, 150, scale=0.3, index=i)
+            self.scene.add_sprite("SlotsW", s)
+            i += 1
+
+        self.scene.add_sprite_list("Tooltips")
+
+        self.load_inventory()
+
     def on_draw(self):
         self.clear()
         self.camera.use()
-        self.scene.draw(pixelated=True)
+
+        self.scene.draw()
 
         self.draw_stats()
 
         self.draw_shop()
 
         self.draw_wave()
+
+        if self.tooltip and self.tooltip.slot.item:
+            self.tooltip.draw()
+            self.tooltip.draw_content()
+        else:
+            self.tooltip = None
 
     def draw_stats(self):
         stats = arcade.Text(
@@ -98,17 +126,40 @@ class ShopView(arcade.View):
         )
         inventory.draw()
 
+        for s in self.scene.get_sprite_list("Slots"):
+            s.draw_item()
+
+        for s in self.scene.get_sprite_list("SlotsW"):
+            s.draw_item()
+
     def draw_shop(self):
         shop = arcade.Text(
             f"SHOP",
-            SCREEN_WIDTH / 2,
+            SCREEN_WIDTH - 500 - 20,
             SCREEN_HEIGHT - 70,
             (0, 0, 0, 255),
             50,
             font_name="First Time Writing!",
-            anchor_x="center"
+            anchor_x="right"
         )
         shop.draw()
+
+        coin_image = arcade.Sprite("sprites/coin.png", center_x=550, center_y=SCREEN_HEIGHT - 50, scale=1)
+
+        coins = arcade.Text(
+            f"{self.playerObject.coins}",
+            coin_image.right + 20,
+            SCREEN_HEIGHT - 75,
+            (0, 0, 0, 255),
+            50,
+            font_name="First Time Writing!",
+            bold=True,
+            anchor_x="left"
+        )
+
+        coins.draw()
+        coin_image.draw()
+
         for i in self.itemsToSell:
             i.draw()
 
@@ -197,3 +248,25 @@ class ShopView(arcade.View):
 
     def next_wave(self, e):
         self.window.show_view(self.gameView)
+        self.tooltip = None
+
+    def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
+        for s in self.scene.get_sprite_list("Slots"):
+            if s.is_clicked(x, y) and s.item is not None:
+                self.show_tooltip(s)
+                break
+        for s in self.scene.get_sprite_list("SlotsW"):
+            if s.is_clicked(x, y) and s.item is not None:
+                self.show_tooltip(s)
+                break
+
+    def show_tooltip(self, slot):
+        if self.tooltip and slot is self.tooltip.slot:
+            self.tooltip = None
+        else:
+            self.tooltip = gui.ToolTip(slot.right + 64, slot.top + 64, slot, self.playerObject)
+
+    def load_inventory(self):
+        for w in range(0, len(self.playerObject.weapons)):
+            self.scene.get_sprite_list("SlotsW")[w].add_item(self.playerObject.weapons[w])
+

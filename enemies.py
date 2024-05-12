@@ -308,7 +308,7 @@ class LongRangeEnemy(Enemy):
 
 class Slime(CloseRangeEnemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=4, max_coin_drop=5, hp=5,
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=1, max_coin_drop=3, hp=5,
                          move_speed=1.5,
                          attack_damage=5)
         self.move_time_interval = 0.2
@@ -318,7 +318,7 @@ class Slime(CloseRangeEnemy):
 
 class SlimeMedium(CloseRangeEnemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10,
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=3, max_coin_drop=5, hp=10,
                          move_speed=1.25,
                          attack_damage=7, attack_cooldown=1.5)
         self.move_time_interval = 0.2
@@ -331,7 +331,7 @@ class SlimeMedium(CloseRangeEnemy):
 
 class SlimeBig(CloseRangeEnemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=15, max_coin_drop=20, hp=20,
+        super().__init__(name="slime", pos_x=pos_x, pos_y=pos_y, min_coin_drop=5, max_coin_drop=7, hp=25,
                          move_speed=0.75,
                          attack_damage=12, attack_cooldown=2)
         self.move_time_interval = 0.2
@@ -345,7 +345,7 @@ class SlimeBig(CloseRangeEnemy):
 
 class Skeleton(CloseRangeEnemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="skeleton", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10,
+        super().__init__(name="skeleton", pos_x=pos_x, pos_y=pos_y, min_coin_drop=2, max_coin_drop=5, hp=15,
 
                          move_speed=1.25,
                          attack_damage=7)
@@ -354,7 +354,7 @@ class Skeleton(CloseRangeEnemy):
 
 class SkeletonArcher(LongRangeEnemy):
     def __init__(self, pos_x, pos_y):
-        super().__init__(name="skeleton_archer", pos_x=pos_x, pos_y=pos_y, min_coin_drop=8, max_coin_drop=10, hp=10,
+        super().__init__(name="skeleton_archer", pos_x=pos_x, pos_y=pos_y, min_coin_drop=3, max_coin_drop=6, hp=15,
                          move_speed=1.25,
                          attack_damage=7, attack_cooldown=1.5,
                          attack_range=2, bullet_speed=1.5, bullet_texture="sprites/items/weapons/bullets/arrow.png")

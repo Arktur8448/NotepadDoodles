@@ -3,7 +3,7 @@ import random
 
 weapons = [
     items.Weapon("sprites/items/weapons/dagger.png", "Dagger", damage=7, speed=0.5, attack_range=0.75, price_buy=150),
-    items.Weapon("sprites/coin.png", "Axe", damage=15, speed=1.5, attack_range=1, slash_scale=1.5, price_buy=250),
+    items.Weapon("sprites/coin.png", "Axe", damage=15, speed=1.5, attack_range=1, slash_scale=1.5, price_buy=200),
     items.Weapon("sprites/items/weapons/sword.png", "Sword", damage=10, price_buy=100),
     items.Weapon("sprites/items/weapons/greatSword.png", "Great Sword", damage=20, speed=2, attack_range=2, slash_scale=2, price_buy=250)
 ]
@@ -27,3 +27,13 @@ def random_ranged():
 
 def random_wand():
     return random.choice(wands)
+
+
+def random_tool():
+    a = random.randint(1,3)
+    if a == 1:
+        return random_weapon()
+    elif a == 2:
+        return random_ranged()
+    elif a == 3:
+        return random_wand()

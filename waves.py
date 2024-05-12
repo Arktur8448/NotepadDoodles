@@ -157,4 +157,5 @@ class Wave:
 
     def end_wave(self, scene):
         scene.get_sprite_list("Enemies").clear()
+        scene.get_sprite_list("Bullets").clear()
         self.completed = True

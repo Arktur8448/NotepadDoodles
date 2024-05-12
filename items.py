@@ -2,14 +2,14 @@ import arcade
 
 
 class Item(arcade.Sprite):
-    def __init__(self, sprite_path, name, price_buy=1):
+    def __init__(self, sprite_path, name, price_buy=0):
         super().__init__(filename=sprite_path, scale=1)
         self.name = name
         self.price_buy = price_buy
 
 
 class Weapon(Item):
-    def __init__(self, sprite_path, name, price_buy=1, damage=1,
+    def __init__(self, sprite_path, name, price_buy=0, damage=1,
                  speed=1, attack_range=1, slash_scale=1):
         super().__init__(sprite_path, name, price_buy)
         self.damage = damage
@@ -30,7 +30,7 @@ class Weapon(Item):
 
 
 class RangedWeapon(Item):
-    def __init__(self, sprite_path, bullet_path, name, price_buy=1,
+    def __init__(self, sprite_path, bullet_path, name, price_buy=0,
                  damage=1, speed=1, attack_range=1, bullet_speed=1):
         super().__init__(sprite_path, name, price_buy)
         self.bullet_path = bullet_path
@@ -52,7 +52,7 @@ class RangedWeapon(Item):
 
 
 class Wand(Item):
-    def __init__(self, sprite_path, bullet_path, name,  price_buy=1,
+    def __init__(self, sprite_path, bullet_path, name,  price_buy=0,
                  damage=1, speed=1, attack_range=1, bullet_speed=1):
         super().__init__(sprite_path, name, price_buy)
         self.bullet_path = bullet_path
