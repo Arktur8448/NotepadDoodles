@@ -18,7 +18,7 @@ class Player(arcade.Sprite):
 
         self.movement_speed = 6000
         self.sprint_multiplayer = 1.25
-        self.max_sprint_speed = 4000
+        self.max_sprint_speed = 99000
 
         self.dash_distance = 2000
         self.dash_cooldown = 1

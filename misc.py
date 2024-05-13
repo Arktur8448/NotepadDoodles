@@ -2,6 +2,8 @@ import random
 
 import arcade
 
+import sound
+
 
 class Coin(arcade.Sprite):
     def __init__(self, value, x, y):
@@ -38,5 +40,6 @@ class Coin(arcade.Sprite):
                 self.center_x -= min(self.move_speed, self.center_x - playerObject.center_x)
 
     def collect(self, playerObject):
+        sound.play_sound("sounds/coin.mp3")
         playerObject.coins += self.value
         self.kill()

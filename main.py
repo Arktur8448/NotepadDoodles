@@ -6,6 +6,7 @@ import enemies
 import player as pl
 import fight
 import characters
+import sound
 import waves
 import arcade.gui
 import gui
@@ -15,12 +16,9 @@ import json
 # python -m nuitka --mingw64 main.py --windows-icon-from-ico="icon.ico" --disable-console --onefile
 # TODO
 # Shop
-# artefakty i potki
 # boss
-# more wrogów, items , charms , fal
-# dzwięki i głośność
-# poziomy trudności
-# win screen
+# more wrogów, fal
+# poziomy trudności i win screen
 
 fullScreen = True
 
@@ -40,18 +38,31 @@ BG_COLOR = (248, 245, 226)
 try:
     with open("SETTINGS.json", 'r') as file:
         settings = json.load(file)
+    sound.set_music_volume(settings["music_volume"])
+    sound.set_sound_volume(settings["sound_volume"])
 except FileNotFoundError:
     settings = {
         "vsync": False,
         "showFps": False,
+        "music_volume": 50,
+        "sound_volume": 50,
+    }
+except KeyError:
+    settings = {
+        "vsync": False,
+        "showFps": False,
+        "music_volume": 20,
+        "sound_volume": 30,
     }
 
 
 class GameWindow(arcade.Window):
     def __init__(self, width, height, title):
-        super().__init__(width, height, title, antialiasing=True, vsync=settings.get("vsync"), center_window=True, fullscreen=fullScreen)
+        super().__init__(width, height, title, antialiasing=True, vsync=settings.get("vsync"), center_window=True,
+                         fullscreen=fullScreen)
         arcade.load_font("fonts/FirstTimeWriting.ttf")
         self.playerObject = None
+        sound.start_playing_music()
 
     def on_key_press(self, key, key_modifiers):
         try:
@@ -64,6 +75,9 @@ class GameWindow(arcade.Window):
             del self.playerObject.keys[key]
         except:
             pass
+
+    def on_update(self, delta_time: float):
+        sound.update_music_player()
 
 
 class GameView(arcade.View):
@@ -271,13 +285,16 @@ class GameView(arcade.View):
             if arcade.key.C in self.playerObject.keys:
                 del self.playerObject.keys[arcade.key.C]
                 self.playerObject.coins += 100
+            if arcade.key.S in self.playerObject.keys:
+                del self.playerObject.keys[arcade.key.S]
+                self.waveManager.current_wave.count_down = 0
 
-        if arcade.key.E in self.playerObject.keys:
-            del self.playerObject.keys[arcade.key.E]
-            for i in range(0, 20):
-                b = fight.Bullet("sprites/coin.png", 300, 1, 600, self.playerObject.position)
-                b.shoot({self.playerObject.center_x + random.randint(-500, 500), self.playerObject.center_y + random.randint(-500, 500)})
-                self.scene.add_sprite("Bullets", b)
+        # if arcade.key.E in self.playerObject.keys:
+        #     del self.playerObject.keys[arcade.key.E]
+        #     for i in range(0, 20):
+        #         b = fight.Bullet("sprites/coin.png", 300, 1, 600, self.playerObject.position)
+        #         b.shoot({self.playerObject.center_x + random.randint(-500, 500), self.playerObject.center_y + random.randint(-500, 500)})
+        #         self.scene.add_sprite("Bullets", b)
 
 
 class PauseView(arcade.View):
@@ -361,14 +378,17 @@ class PauseView(arcade.View):
             self.un_pause()
 
     def un_pause(self, event=None):
+        sound.play_random_paper()
         if self.window.current_view is self:
             self.window.show_view(self.game_view)
 
     def main_menu(self, event=None):
+        sound.play_random_paper()
         if self.window.current_view is self:
             self.window.show_view(MainMenuView())
 
     def show_settings(self, event=None):
+        sound.play_random_paper()
         if self.window.current_view is self:
             self.window.show_view(SettingsView(self))
 
@@ -388,6 +408,9 @@ class SettingsView(arcade.View):
             self.fps_text = "X"
         else:
             self.fps_text = " "
+
+        self.music_bar = None
+        self.sound_bar = None
 
     def generate_buttons(self):
         self.manager = arcade.gui.UIManager()
@@ -453,6 +476,11 @@ class SettingsView(arcade.View):
         self.camera.move_to((60, 460))
         self.generate_buttons()
 
+        self.music_bar = gui.Volume("MUSIC VOLUME", SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT / 2 - 200,
+                                    "sprites/gui/bars/Bar.png", 300, 50)
+        self.sound_bar = gui.Volume("SOUND VOLUME", SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT / 2 - 300,
+                                    "sprites/gui/bars/Bar.png", 300, 50)
+
     def on_draw(self):
         self.clear()
         self.camera.use()
@@ -472,8 +500,13 @@ class SettingsView(arcade.View):
 
         self.manager.draw()
 
+        self.music_bar.draw()
+        self.sound_bar.draw()
+
     def show_back_view(self, event=None):
-        self.window.show_view(self.back_view)
+        if self.window.current_view is self:
+            self.window.show_view(self.back_view)
+            sound.play_random_paper()
 
     def toggle_vsync(self, event=None):
         if self.window.current_view is self:
@@ -500,8 +533,15 @@ class SettingsView(arcade.View):
             self.save_settings()
 
     def save_settings(self):
+        settings["music_volume"] = sound.get_music_volume()
+        settings["sound_volume"] = sound.get_sound_volume()
         with open("SETTINGS.json", 'w') as file:
             json.dump(settings, file)
+
+    def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
+        self.music_bar.is_clicked(x, y)
+        self.sound_bar.is_clicked(x, y)
+        self.save_settings()
 
 
 class MainMenuView(arcade.View):
@@ -579,15 +619,18 @@ class MainMenuView(arcade.View):
 
     def start(self, event=None):
         if self.window.current_view is self:
+            sound.play_random_paper()
             charactersView = CharacterView()
             self.window.show_view(charactersView)
 
     def exit(self, event=None):
         if self.window.current_view is self:
+            sound.play_random_paper()
             arcade.exit()
 
     def show_settings(self, event=None):
         if self.window.current_view is self:
+            sound.play_random_paper()
             self.window.show_view(SettingsView(self))
 
 
@@ -646,6 +689,7 @@ class CharacterView(arcade.View):
     def show_main_menu(self, event=None):
         if self.window.current_view is self:
             self.window.show_view(MainMenuView())
+            sound.play_random_paper()
 
     def play(self, character):
         if self.window.current_view is self:

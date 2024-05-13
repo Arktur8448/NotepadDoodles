@@ -3,6 +3,7 @@ import arcade
 import gui
 import itemDB
 import items
+import sound
 
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 if not SCREEN_WIDTH == 1920 and not SCREEN_HEIGHT == 1080:
@@ -36,12 +37,12 @@ class ShopView(arcade.View):
                 child=v_box)
         )
         self.itemsToSell = [
-            gui.ShopCard(500 + 250, SCREEN_HEIGHT - 225, itemDB.random_tool(), self, 0.85),
-            gui.ShopCard(SCREEN_WIDTH - 500 - 250, SCREEN_HEIGHT - 225, itemDB.random_tool(), self, 0.85),
+            gui.ShopCard(500 + 250, SCREEN_HEIGHT - 225, itemDB.random_util(), self, 0.85),
+            gui.ShopCard(SCREEN_WIDTH - 500 - 250, SCREEN_HEIGHT - 225, itemDB.random_util(), self, 0.85),
             gui.ShopCard(500 + 250, SCREEN_HEIGHT / 2, itemDB.random_tool(), self, 0.85),
             gui.ShopCard(SCREEN_WIDTH - 500 - 250, SCREEN_HEIGHT / 2, itemDB.random_tool(), self, 0.85),
-            gui.ShopCard(500 + 250, 225, itemDB.random_tool(), self, 0.85),
-            gui.ShopCard(SCREEN_WIDTH - 500 - 250, 225, itemDB.random_tool(), self, 0.85),
+            gui.ShopCard(500 + 250, 225, itemDB.random_item(), self, 0.85),
+            gui.ShopCard(SCREEN_WIDTH - 500 - 250, 225, itemDB.random_item(), self, 0.85),
         ]
 
     def on_show_view(self):
@@ -67,15 +68,14 @@ class ShopView(arcade.View):
                                                 texture=divider))
 
         self.scene.add_sprite_list("Slots")
-
         i = 0
         for r in range(0, 3):
             for c in range(0, 6):
-                s = gui.Slot(50 + 80 * c, (SCREEN_HEIGHT / 2 - 250) + 80 * r, scale=0.2, index=i)
+                s = gui.Slot(50 + 80 * c, (SCREEN_HEIGHT / 2 - 100) - 80 * r, scale=0.2, index=i)
                 self.scene.add_sprite("Slots", s)
                 i += 1
-        self.scene.add_sprite_list("SlotsW")
 
+        self.scene.add_sprite_list("SlotsW")
         i = 0
         for c in range(0, 4):
             s = gui.Slot(70 + 120 * c, 150, scale=0.3, index=i)
@@ -218,18 +218,18 @@ class ShopView(arcade.View):
 
     def generate_stats(self):
         desc = ""
-        desc += f"Hp: {self.playerObject.max_hp}\n"
-        desc += f"HP Regen Rate per Second: {self.playerObject.hp_regen_rate}\n"
-        desc += f"Stamina: {self.playerObject.max_stamina}\n"
-        desc += f"Stamina Regen Rate per Second: {self.playerObject.stamina_regen_rate}\n\n"
+        desc += f"Hp: {round(int(self.playerObject.hp), 2)}/{round(int(self.playerObject.max_hp), 2)}\n"
+        desc += f"HP Regen Rate per Second: {round(self.playerObject.hp_regen_rate, 2)}\n"
+        desc += f"Stamina: {round(self.playerObject.max_stamina, 2)}\n"
+        desc += f"Stamina Regen Rate per Second: {round(self.playerObject.stamina_regen_rate, 2)}\n\n"
 
-        desc += f"Strength: {self.playerObject.strength}\n"
-        desc += f"Agility: {self.playerObject.agility}\n"
-        desc += f"Accuracy: {self.playerObject.accuracy}\n\n"
+        desc += f"Strength: {round(self.playerObject.strength, 2)}\n"
+        desc += f"Agility: {round(self.playerObject.agility, 2)}\n"
+        desc += f"Accuracy: {round(self.playerObject.accuracy, 2)}\n\n"
 
-        desc += f"Movement Speed: {self.playerObject.movement_speed / 100}\n"
-        desc += f"Dash Distance: {self.playerObject.dash_distance / 100}\n"
-        desc += f"Dash Cooldown: {self.playerObject.dash_cooldown}s\n\n"
+        desc += f"Movement Speed: {round(self.playerObject.movement_speed / 100, 2)}\n"
+        desc += f"Dash Distance: {round(self.playerObject.dash_distance / 100, 2)}\n"
+        desc += f"Dash Cooldown: {round(self.playerObject.dash_cooldown, 2)}s\n\n"
 
         if self.playerObject.character.detailed_desc_addition is not None:
             desc += f"{self.playerObject.character.detailed_desc_addition} \n"
@@ -247,6 +247,7 @@ class ShopView(arcade.View):
         )
 
     def next_wave(self, e):
+        sound.play_sound("sounds/wave_start.mp3")
         self.window.show_view(self.gameView)
         self.tooltip = None
 
@@ -263,10 +264,23 @@ class ShopView(arcade.View):
     def show_tooltip(self, slot):
         if self.tooltip and slot is self.tooltip.slot:
             self.tooltip = None
+            sound.play_random_paper()
         else:
-            self.tooltip = gui.ToolTip(slot.right + 64, slot.top + 64, slot, self.playerObject)
+            self.tooltip = gui.ToolTip(slot.right + 64, slot.top + 64, slot, self)
+            sound.play_random_paper()
 
     def load_inventory(self):
+        for i in self.scene.get_sprite_list("Slots"):
+            i.item = None
+            i.image = None
+
+        for w in self.scene.get_sprite_list("SlotsW"):
+            w.item = None
+            w.image = None
+
+        for i in range(0, len(self.playerObject.inventory)):
+            self.scene.get_sprite_list("Slots")[i].add_item(self.playerObject.inventory[i])
+
         for w in range(0, len(self.playerObject.weapons)):
             self.scene.get_sprite_list("SlotsW")[w].add_item(self.playerObject.weapons[w])
 

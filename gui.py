@@ -3,6 +3,7 @@ import arcade.gui
 from typing import Tuple
 
 import items
+import sound
 
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 if not SCREEN_WIDTH == 1920 and not SCREEN_HEIGHT == 1080:
@@ -51,7 +52,6 @@ class IndicatorBar:
     def draw(self):
         self._background_box.draw_sized(self.center_x, self.center_y, self._box_width + self.border_size,
                                         self._box_height + self.border_size)
-        # self._full_box.draw_sized(self.center_x - (self._box_width / 2) + (self._full_width / 2), self.center_y, self._full_width, self._box_height)
         arcade.draw_rectangle_filled(self.center_x - (self._box_width / 2) + (self._full_width / 2), self.center_y,
                                      self._full_width, self._box_height, (0, 0, 0, 100))
 
@@ -71,6 +71,9 @@ class IndicatorBar:
         elif new_fullness < 0:
             self._fullness = 0
             self._full_width = 0
+        elif new_fullness > 1.0:
+            self._fullness = 1
+            self._full_width = self._box_width
 
     @property
     def position(self) -> Tuple[float, float]:
@@ -81,6 +84,65 @@ class IndicatorBar:
     def position(self, new_position: Tuple[float, float]) -> None:
         """Changes the current position of the bar."""
         self.center_x, self.center_y = new_position
+
+
+class Volume(IndicatorBar):
+    def __init__(
+            self,
+            name,
+            center_x,
+            center_y,
+            background_sprite,
+            width: int = 100,
+            height: int = 4,
+            border_size: int = 4,
+    ):
+        super().__init__(center_x, center_y, background_sprite, width, height, border_size)
+        self.name = name
+        if self.name == "MUSIC VOLUME":
+            self.fullness = sound.get_music_volume() / 100
+        elif self.name == "SOUND VOLUME":
+            self.fullness = sound.get_sound_volume() / 100
+
+    def is_clicked(self, x, y):
+        x_range = range(int((self.center_x - self._box_width / 2)), int((self.center_x + self._box_width / 2)))
+        x_margin = range(int((self.center_x - self._box_width / 2)) - 20, int((self.center_x + self._box_width / 2)) + 20)
+        y_margin = range(int((self.center_y - self._box_height / 2)) - 20, int((self.center_y + self._box_height / 2)) + 20)
+        if x in x_margin and y in y_margin:
+            x_value_range = max(x_range) - min(x_range)
+            click_value = x - min(x_range)
+            self.fullness = round((int((click_value / x_value_range) * 100))/100, 2)
+            if self.name == "MUSIC VOLUME":
+                sound.set_music_volume(int(self.fullness * 100))
+            elif self.name == "SOUND VOLUME":
+                sound.set_sound_volume(int(self.fullness * 100))
+
+    def draw(self):
+        name = arcade.Text(
+            self.name,
+            self.center_x - 620,
+            self.center_y - 20,
+            color=(0, 0, 0, 255),
+            font_size=40,
+            font_name="First Time Writing!",
+            bold=True,
+        )
+        name.draw()
+
+        arcade.draw_rectangle_filled(self.center_x, self.center_y, self._box_width + self.border_size,
+                                     self._box_height + self.border_size, (0, 0, 0, 205))
+        arcade.draw_rectangle_filled(self.center_x - (self._box_width / 2) + (self._full_width / 2), self.center_y,
+                                     self._full_width, self._box_height, (200, 200, 200))
+        volume = arcade.Text(
+            f"{int(self.fullness * 100)} %",
+            self.center_x + 220,
+            self.center_y - 30,
+            color=(0, 0, 0, 255),
+            font_size=55,
+            font_name="First Time Writing!",
+            bold=True,
+        )
+        volume.draw()
 
 
 class Button(arcade.gui.UITextureButton):
@@ -159,6 +221,7 @@ class CharacterCard:
         self.manager.draw()
 
     def start(self, event=None):
+        sound.play_sound("sounds/wave_start.mp3")
         self.view.play(self.character)
 
 
@@ -187,7 +250,10 @@ class ShopCard:
             font_size=30 * self.scale,
             font_name="First Time Writing!",
             bold=True,
-            anchor_x="center"
+            anchor_x="center",
+            multiline=True,
+            width=250 * self.scale,
+            align="center"
         )
 
         desc = ""
@@ -201,6 +267,16 @@ class ShopCard:
             desc += f"Speed: {10 - self.item.speed}\n"
             desc += f"Range: {self.item.attack_range}\n"
             desc += f"Bullet Speed: {self.item.bullet_speed}\n"
+
+        elif type(self.item) is items.Ring:
+            if self.item.percentage > 0:
+                sign = "+"
+            else:
+                sign = ""
+            desc += f"{self.item.text_to_display.upper()}: {sign}{self.item.percentage}%\n"
+
+        elif type(self.item) is items.Potion:
+            desc += f"Heals {self.item.amount} hp\n"
 
         self.desc = arcade.Text(
             desc,
@@ -264,12 +340,28 @@ class ShopCard:
         self.desc.draw()
 
     def buy(self, event=None):
-        if arcade.get_window().current_view is self.view:
-            if type(self.item) is items.Weapon or type(self.item) is items.Wand or type(self.item) is items.RangedWeapon:
-                if len(self.view.playerObject.weapons) < 4 and self.view.playerObject.coins >= self.item.price_buy:
+        if arcade.get_window().current_view is self.view and self.view.playerObject.coins >= self.item.price_buy:
+            sound.play_sound("sounds/buy.mp3")
+            if type(self.item) is items.Weapon or type(self.item) is items.Wand or type(
+                    self.item) is items.RangedWeapon:
+                if len(self.view.playerObject.weapons) < 4:
                     self.view.playerObject.weapons.append(self.item)
                     self.view.playerObject.coins -= self.item.price_buy
                     self.ifSold = True
+            elif type(self.item) is items.Ring:
+                if len(self.view.playerObject.inventory) < 24:
+                    self.view.playerObject.inventory.append(self.item)
+                    self.view.playerObject.coins -= self.item.price_buy
+                    self.item.apply(self.view.playerObject)
+                    self.view.generate_stats()
+                    self.ifSold = True
+            elif type(self.item) is items.Potion:
+                self.view.playerObject.coins -= self.item.price_buy
+                self.view.playerObject.hp += self.item.amount
+                if self.view.playerObject.hp > self.view.playerObject.max_hp:
+                    self.view.playerObject.hp = self.view.playerObject.max_hp
+                self.view.generate_stats()
+                self.ifSold = True
 
         self.view.load_inventory()
 
@@ -287,21 +379,24 @@ class Slot(arcade.Sprite):
 
     def add_item(self, item):
         self.item = item
-        self.image = arcade.Sprite(texture=self.item.texture, center_x=self.center_x, center_y=self.center_y, scale=self.scale / 0.3)
+        self.image = arcade.Sprite(texture=self.item.texture, center_x=self.center_x, center_y=self.center_y,
+                                   scale=self.scale / 0.3)
 
     def is_clicked(self, point_x, point_y):
         slot_center_x = self.center_x
         slot_center_y = self.center_y
         half_width = self.width / 2
         half_height = self.height / 2
-        return (slot_center_x - half_width <= point_x <= slot_center_x + half_width) and (slot_center_y - half_height <= point_y <= slot_center_y + half_height)
+        return (slot_center_x - half_width <= point_x <= slot_center_x + half_width) and (
+                slot_center_y - half_height <= point_y <= slot_center_y + half_height)
 
 
 class ToolTip(arcade.Sprite):
-    def __init__(self, x, y, slot, player):
+    def __init__(self, x, y, slot, view):
         super().__init__(center_x=x, center_y=y, filename="sprites/gui/tooltip.png", scale=1.3)
         self.slot = slot
-        self.playerObject = player
+        self.playerObject = view.playerObject
+        self.view = view
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
         sell = Button(100, 25, "SELL", font_size=15)
@@ -339,6 +434,13 @@ class ToolTip(arcade.Sprite):
             desc += f"Range: {self.slot.item.attack_range}\n"
             desc += f"Bullet Speed: {self.slot.item.bullet_speed}\n"
 
+        elif type(self.slot.item) is items.Ring:
+            if self.slot.item.percentage > 0:
+                sign = "+"
+            else:
+                sign = ""
+            desc += f"{self.slot.item.text_to_display.upper()}: {sign}{self.slot.item.percentage}%\n"
+
         desc += f"Value: {self.slot.item.price_buy // 2}"
 
         desc_t = arcade.Text(
@@ -358,7 +460,17 @@ class ToolTip(arcade.Sprite):
         self.manager.draw()
 
     def sell(self, e=None):
-        if type(self.slot.item) is items.Weapon or type(self.slot.item) is items.Wand or type(self.slot.item) is items.RangedWeapon:
+        sound.play_sound("sounds/coin.mp3")
+        if type(self.slot.item) is items.Weapon or type(self.slot.item) is items.Wand or type(
+                self.slot.item) is items.RangedWeapon:
             del self.playerObject.weapons[self.slot.index]
             self.playerObject.coins += self.slot.item.price_buy // 2
             self.slot.item = None
+        elif type(self.slot.item) is items.Ring:
+            del self.playerObject.inventory[self.slot.index]
+            self.playerObject.coins += self.slot.item.price_buy // 2
+            self.slot.item.deapply(self.playerObject)
+            self.slot.item = None
+            self.view.generate_stats()
+        self.view.load_inventory()
+        self.view.tooltip = None

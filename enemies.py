@@ -4,6 +4,7 @@ import arcade
 import gui
 import misc
 import fight
+import sound
 
 
 class Enemy(arcade.Sprite):
@@ -135,6 +136,7 @@ class Enemy(arcade.Sprite):
     def damage(self, hp):
         self.hp -= hp
         self.playHitAnimation = True
+        sound.play_random_write()
 
     def attack_player(self, gameView):
         """Attack Behaviour"""
@@ -158,6 +160,7 @@ class Enemy(arcade.Sprite):
                 scene.add_sprite("Coins", misc.Coin(1, self.center_x, self.center_y))
                 self.coin_drop -= 1
         self.kill()
+
 
     def die_effect(self):
         pass

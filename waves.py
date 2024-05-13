@@ -1,6 +1,7 @@
 import random
 import arcade
 import shop
+import sound
 
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
 if not SCREEN_WIDTH == 1920 and not SCREEN_HEIGHT == 1080:
