@@ -20,6 +20,10 @@ import json
 # more wrogów, fal
 # poziomy trudności i win screen
 
+#FIX
+# ceny
+# coiny między falami 
+
 fullScreen = True
 
 SCREEN_WIDTH, SCREEN_HEIGHT = arcade.window_commands.get_display_size()
