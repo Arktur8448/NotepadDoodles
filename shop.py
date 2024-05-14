@@ -38,7 +38,7 @@ class ShopView(arcade.View):
         )
         self.itemsToSell = [
             gui.ShopCard(500 + 250, SCREEN_HEIGHT - 225, itemDB.random_util(), self, 0.85),
-            gui.ShopCard(SCREEN_WIDTH - 500 - 250, SCREEN_HEIGHT - 225, itemDB.random_util(), self, 0.85),
+            gui.ShopCard(SCREEN_WIDTH - 500 - 250, SCREEN_HEIGHT - 225, itemDB.random_item(), self, 0.85),
             gui.ShopCard(500 + 250, SCREEN_HEIGHT / 2, itemDB.random_tool(), self, 0.85),
             gui.ShopCard(SCREEN_WIDTH - 500 - 250, SCREEN_HEIGHT / 2, itemDB.random_tool(), self, 0.85),
             gui.ShopCard(500 + 250, 225, itemDB.random_item(), self, 0.85),
@@ -223,9 +223,9 @@ class ShopView(arcade.View):
         desc += f"Stamina: {round(self.playerObject.max_stamina, 2)}\n"
         desc += f"Stamina Regen Rate per Second: {round(self.playerObject.stamina_regen_rate, 2)}\n\n"
 
-        desc += f"Strength: {round(self.playerObject.strength, 2)}\n"
-        desc += f"Agility: {round(self.playerObject.agility, 2)}\n"
-        desc += f"Accuracy: {round(self.playerObject.accuracy, 2)}\n\n"
+        desc += f"Strength  (Mele Damage Multiplier): {round(self.playerObject.strength, 2)}%\n"
+        desc += f"Agility  (Wands Damage Multiplier): {round(self.playerObject.agility, 2)}%\n"
+        desc += f"Accuracy  (Bows Damage Multiplier): {round(self.playerObject.accuracy, 2)}%\n\n"
 
         desc += f"Movement Speed: {round(self.playerObject.movement_speed / 100, 2)}\n"
         desc += f"Dash Distance: {round(self.playerObject.dash_distance / 100, 2)}\n"
@@ -247,9 +247,10 @@ class ShopView(arcade.View):
         )
 
     def next_wave(self, e):
-        sound.play_sound("sounds/wave_start.mp3")
-        self.window.show_view(self.gameView)
-        self.tooltip = None
+        if self.window.current_view is self:
+            sound.play_sound("sounds/wave_start.mp3")
+            self.window.show_view(self.gameView)
+            self.tooltip = None
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         for s in self.scene.get_sprite_list("Slots"):

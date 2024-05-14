@@ -16,13 +16,8 @@ import json
 # python -m nuitka --mingw64 main.py --windows-icon-from-ico="icon.ico" --disable-console --onefile
 # TODO
 # Shop
-# boss
-# more wrogów, fal
-# poziomy trudności i win screen
-
-#FIX
-# ceny
-# coiny między falami 
+# win screen
+# muzyki troche więcej
 
 fullScreen = True
 
@@ -147,27 +142,42 @@ class GameView(arcade.View):
         except:
             pass
 
-        self.waveManager = waves.WaveManager(self, 5, spawn_cooldown_change=0.25)
+        self.waveManager = waves.WaveManager(self, 10, spawn_cooldown_change=0.25)
 
         self.waveManager.get_wave(1).add_enemy(enemies.Slime)
-        self.waveManager.get_wave(1).add_enemy(enemies.Skeleton)
 
         self.waveManager.get_wave(2).add_enemy(enemies.Slime)
-        self.waveManager.get_wave(2).add_enemy(enemies.SlimeMedium)
-        self.waveManager.get_wave(2).add_enemy(enemies.SkeletonArcher)
         self.waveManager.get_wave(2).add_enemy(enemies.Skeleton)
 
-        self.waveManager.get_wave(3).add_enemy(enemies.Skeleton)
+        self.waveManager.get_wave(3).add_enemy(enemies.Slime)
         self.waveManager.get_wave(3).add_enemy(enemies.SlimeMedium)
         self.waveManager.get_wave(3).add_enemy(enemies.SlimeBig)
-        self.waveManager.get_wave(3).add_enemy(enemies.SkeletonArcher)
 
-        self.waveManager.get_wave(4).add_enemy(enemies.SlimeMedium)
-        self.waveManager.get_wave(4).add_enemy(enemies.SlimeBig)
         self.waveManager.get_wave(4).add_enemy(enemies.SkeletonArcher)
+        self.waveManager.get_wave(4).add_enemy(enemies.Skeleton)
 
-        self.waveManager.get_wave(5).add_enemy(enemies.SlimeBig)
-        self.waveManager.get_wave(5).add_enemy(enemies.SkeletonArcher)
+        self.waveManager.get_wave(5).add_enemy(enemies.SlimeMedium)
+        self.waveManager.get_wave(5).add_enemy(enemies.Spike)
+
+        self.waveManager.get_wave(6).add_enemy(enemies.Spike)
+        self.waveManager.get_wave(6).add_enemy(enemies.SlimeBig)
+        self.waveManager.get_wave(6).add_enemy(enemies.SkeletonArcher)
+
+        self.waveManager.get_wave(7).add_enemy(enemies.Skeleton)
+        self.waveManager.get_wave(7).add_enemy(enemies.SlimeBig)
+        self.waveManager.get_wave(7).add_enemy(enemies.Spike)
+        self.waveManager.get_wave(7).add_enemy(enemies.SkeletonArcher)
+
+        self.waveManager.get_wave(8).add_enemy(enemies.SkeletonArcher)
+        self.waveManager.get_wave(8).add_enemy(enemies.Spike)
+
+        self.waveManager.get_wave(9).add_enemy(enemies.SlimeMedium)
+        self.waveManager.get_wave(9).add_enemy(enemies.SlimeBig)
+        self.waveManager.get_wave(9).add_enemy(enemies.SlimeBig)
+
+        self.waveManager.get_wave(10).add_enemy(enemies.SlimeBig)
+        self.waveManager.get_wave(10).add_enemy(enemies.SkeletonArcher)
+        self.waveManager.get_wave(10).add_enemy(enemies.Spike)
 
     def on_draw(self):
         self.clear()
@@ -382,18 +392,18 @@ class PauseView(arcade.View):
             self.un_pause()
 
     def un_pause(self, event=None):
-        sound.play_random_paper()
         if self.window.current_view is self:
+            sound.play_random_paper()
             self.window.show_view(self.game_view)
 
     def main_menu(self, event=None):
-        sound.play_random_paper()
         if self.window.current_view is self:
+            sound.play_random_paper()
             self.window.show_view(MainMenuView())
 
     def show_settings(self, event=None):
-        sound.play_random_paper()
         if self.window.current_view is self:
+            sound.play_random_paper()
             self.window.show_view(SettingsView(self))
 
 
@@ -664,7 +674,7 @@ class CharacterView(arcade.View):
                 self.scene.add_sprite("BG", arcade.Sprite("maps/notepad/Lines.png", center_x=64 * c, center_y=64 * r))
         self.characters = [
             gui.CharacterCard(320, SCREEN_HEIGHT - 350, characters.StickMan(), self),
-            gui.CharacterCard(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 350, characters.Golem(), self),
+            gui.CharacterCard(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 350, characters.Golem(), self, desc_font_size_scale=0.9),
             gui.CharacterCard(SCREEN_WIDTH - 320, SCREEN_HEIGHT - 350, characters.Warrior(), self),
             gui.CharacterCard(320, 250, characters.Ranger(), self),
             gui.CharacterCard(SCREEN_WIDTH / 2, 250, characters.Wizard(), self),

@@ -85,7 +85,7 @@ class WaveManager:
 
 class Wave:
     def __init__(self, cooldown_spawn):
-        self.time = 120
+        self.time = 60
         self.enemies = []
         self._default_enemy_cooldown_spawner = cooldown_spawn
         self.enemy_cooldown_spawner = 0

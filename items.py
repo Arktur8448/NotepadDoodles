@@ -81,7 +81,8 @@ class Ring(Item):
         self.statistic_to_modify = statistic_to_modify
         self.percentage_range = percentage_range
         self.percentage = random.randint(self.percentage_range[0], percentage_range[1])
-        self.price_buy += abs(int(self.price_buy * (self.percentage/100 * 2)))
+        self.start_price_buy = price_buy
+        self.price_buy = self.start_price_buy
         if not text_to_display:
             self.text_to_display = self.statistic_to_modify
         else:
@@ -100,7 +101,7 @@ class Ring(Item):
 
     def regenerate(self):
         self.percentage = random.randint(self.percentage_range[0], self.percentage_range[1])
-        self.price_buy += abs(int(self.price_buy * (self.percentage / 100 * 2)))
+        self.price_buy = self.start_price_buy + abs(int(self.start_price_buy * (self.percentage / 100 * 2)))
 
 
 class Potion(Item):

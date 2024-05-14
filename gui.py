@@ -204,13 +204,13 @@ class CharacterCard:
         )
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
-        play = Button(178 * self.scale, 35 * self.scale, "PLAY")
+        play = Button(178 * self.scale, 55 * self.scale, "PLAY")
         play.on_click = self.start
         self.manager.add(arcade.gui.UIAnchorWidget(
             anchor_x="left",
             anchor_y="bottom",
             align_x=self.border.right - play.width - 40,
-            align_y=self.border.top - play.height - 20,
+            align_y=self.name.y - 10,
             child=play)
         )
 
@@ -425,12 +425,12 @@ class ToolTip(arcade.Sprite):
         desc = ""
         if type(self.slot.item) is items.Weapon:
             desc += f"Damage: {self.slot.item.damage}\n"
-            desc += f"Speed: {self.slot.item.speed}\n"
+            desc += f"Speed: {10 - self.slot.item.speed}\n"
             desc += f"Range: {self.slot.item.attack_range}\n"
 
         elif type(self.slot.item) is items.Wand or type(self.slot.item) is items.RangedWeapon:
             desc += f"Damage: {self.slot.item.damage}\n"
-            desc += f"Speed: {self.slot.item.speed}\n"
+            desc += f"Speed: {10 - self.slot.item.speed}\n"
             desc += f"Range: {self.slot.item.attack_range}\n"
             desc += f"Bullet Speed: {self.slot.item.bullet_speed}\n"
 

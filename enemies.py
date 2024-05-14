@@ -161,7 +161,6 @@ class Enemy(arcade.Sprite):
                 self.coin_drop -= 1
         self.kill()
 
-
     def die_effect(self):
         pass
 
@@ -349,7 +348,6 @@ class SlimeBig(CloseRangeEnemy):
 class Skeleton(CloseRangeEnemy):
     def __init__(self, pos_x, pos_y):
         super().__init__(name="skeleton", pos_x=pos_x, pos_y=pos_y, min_coin_drop=2, max_coin_drop=5, hp=15,
-
                          move_speed=1.25,
                          attack_damage=7)
         self.move_time_interval = 0.5
@@ -359,6 +357,18 @@ class SkeletonArcher(LongRangeEnemy):
     def __init__(self, pos_x, pos_y):
         super().__init__(name="skeleton_archer", pos_x=pos_x, pos_y=pos_y, min_coin_drop=3, max_coin_drop=6, hp=15,
                          move_speed=1.25,
-                         attack_damage=7, attack_cooldown=1.5,
-                         attack_range=2, bullet_speed=1.5, bullet_texture="sprites/items/weapons/bullets/arrow.png")
+                         attack_damage=5, attack_cooldown=1.5,
+                         attack_range=2, bullet_speed=1.25, bullet_texture="sprites/items/weapons/bullets/arrow.png")
         self.move_time_interval = 0.5
+
+
+class Spike(CloseRangeEnemy):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(name="spike", pos_x=pos_x, pos_y=pos_y, min_coin_drop=5, max_coin_drop=10, hp=20,
+                         attack_damage=10, attack_cooldown=2)
+
+    def die_effect(self):
+        for i in range(0, 10):
+            b = Bullet("sprites/items/weapons/bullets/spike.png", 200, 2, 150, self.position)
+            b.shoot({self.center_x + random.randint(-500, 500), self.center_y + random.randint(-500, 500)})
+            self.scene.add_sprite("Bullets", b)

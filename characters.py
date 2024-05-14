@@ -69,35 +69,21 @@ class Character:
     def generate_detailed_desc(self):
         desc = ""
 
-        # HP and Regeneration
-        if self.base_hp != 1:
-            hp_modifier = (self.base_hp * 100 - 100)
-            sign = "+" if hp_modifier >= 0 else "-"
-            desc += f"Hp: {sign}{abs(hp_modifier)}% ({100 * self.base_hp})\n"
+        desc += f"Hp: {100 * self.base_hp}\n"
+        desc += f"Stamina: {15 * self.base_stamina}\n"
+        desc += f"Strength  (Mele Damage Multiplier): {self.base_strength * 100}%\n"
+        desc += f"Agility  (Wands Damage Multiplier): {self.base_agility * 100}%\n"
+        desc += f"Accuracy  (Bows Damage Multiplier): {self.base_accuracy * 100}%\n"
+
         if self.base_hp_regen_rate != 1:
             regen_modifier = (self.base_hp_regen_rate * 100 - 100)
             sign = "+" if regen_modifier >= 0 else "-"
             desc += f"HP Regen Rate: {sign}{abs(regen_modifier)}%\n"
 
-        # Stamina and Regeneration
-        if self.base_stamina != 1:
-            stamina_modifier = (self.base_stamina * 100 - 100)
-            sign = "+" if stamina_modifier >= 0 else "-"
-            desc += f"Stamina: {sign}{abs(stamina_modifier)}% ({15 * self.base_stamina})\n"
         if self.base_stamina_regen_rate != 1:
             stamina_regen_modifier = (self.base_stamina_regen_rate * 100 - 100)
             sign = "+" if stamina_regen_modifier >= 0 else "-"
             desc += f"Stamina Regen Rate: {sign}{abs(stamina_regen_modifier)}%\n"
-
-        # Combat Stats
-        if self.base_strength != 1:
-            strength_modifier = (self.base_strength * 100 - 100)
-            sign = "+" if strength_modifier >= 0 else "-"
-            desc += f"Strength: {sign}{abs(strength_modifier)}%\n"
-        if self.base_accuracy != 1:
-            accuracy_modifier = (self.base_accuracy * 100 - 100)
-            sign = "+" if accuracy_modifier >= 0 else "-"
-            desc += f"Accuracy: {sign}{abs(accuracy_modifier)}%\n"
 
         # Movement Stats
         if self.base_movement_speed != 1:
@@ -142,16 +128,15 @@ class Golem(Character):
     def __init__(self):
         self.name = "Golem"
         self.desc = "The powerful golem with great defence. He is very slow and wonky. His hp takes a long time to regenerate"
-        super().__init__(self.name, self.desc, base_hp=2.5, base_stamina=0, base_stamina_regen_rate=0,
-                         base_hp_regen_rate=0.5,
-                         base_movement_speed=0.5, base_agility=0.25, base_strength=2)
-        self.detailed_desc_addition = "Cannot Sprint or Dash or Dodge\nCannot regenerate any stamina"
+        super().__init__(self.name, self.desc, base_hp=3, base_stamina=0, base_stamina_regen_rate=0,
+                         base_hp_regen_rate=0.75,
+                         base_movement_speed=0.5, base_agility=0.25, base_strength=2, base_dash_duration=0 ,base_dash_cooldown=0, base_dash_distance=0)
+        self.detailed_desc_addition = "Cannot Sprint or Dash \nCannot regenerate any stamina"
         self.starter_weapons = [
-            items.Weapon("sprites/items/weapons/greatSword.png", "Great Sword", damage=20, speed=2, attack_range=2, slash_scale=2)]
+            items.Weapon("sprites/items/weapons/greatSword.png", "Great Sword", damage=20, speed=2, attack_range=1.25, slash_scale=2)]
 
     def character_skills(self, playerObject):
         playerObject.stamina = 0
-        playerObject.dodge = 0
 
 
 class Warrior(Character):
@@ -164,7 +149,7 @@ class Warrior(Character):
                          base_accuracy=0.2,
                          base_strength=1.25)
         self.starter_weapons = [
-            items.Weapon("sprites/coin.png", "Axe", damage=15, speed=1.5, attack_range=1, slash_scale=1.5)]
+            items.Weapon("sprites/items/weapons/axe.png", "Axe", damage=15, speed=1.5, attack_range=1, slash_scale=1.5)]
 
 
 class Ranger(Character):
@@ -178,8 +163,8 @@ class Ranger(Character):
                          base_accuracy=2,base_agility=1.25, base_strength=0)
         self.detailed_desc_addition = "Cannot use close-range weapons"
         self.starter_weapons = [
-            items.RangedWeapon("sprites/coin.png", "sprites/items/weapons/bullets/arrow.png", "Bow", damage=15,
-                               speed=1.5, attack_range=2)]
+            items.RangedWeapon("sprites/items/weapons/bows/bow.png", "sprites/items/weapons/bullets/arrow.png", "Bow",
+                               damage=5, speed=1.5, attack_range=2)]
 
     def character_skills(self, playerObject):
         playerObject.strength = 0
@@ -195,7 +180,8 @@ class Wizard(Character):
                         base_agility=2, base_strength=0, base_accuracy=0)
         self.detailed_desc_addition = "Cannot use close range weapons\nCannot use ranged weapons"
         self.starter_weapons = [
-            items.Wand("sprites/coin.png", "sprites/items/weapons/bullets/magic_bullet.png", "Wand", damage=10, speed=1, attack_range=2)]
+            items.Wand("sprites/items/weapons/wands/wand.png", "sprites/items/weapons/bullets/magic_bullet.png", "Wand",
+                       damage=5, speed=1, attack_range=2)]
 
     def character_skills(self, playerObject):
         playerObject.strength = 0
