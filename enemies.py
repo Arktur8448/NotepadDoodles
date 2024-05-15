@@ -4,6 +4,7 @@ import arcade
 import gui
 import misc
 import fight
+import score
 import sound
 
 
@@ -160,6 +161,7 @@ class Enemy(arcade.Sprite):
                 scene.add_sprite("Coins", misc.Coin(1, self.center_x, self.center_y))
                 self.coin_drop -= 1
         self.kill()
+        score.count_kill()
 
     def die_effect(self):
         pass

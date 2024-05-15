@@ -1,5 +1,7 @@
 import random
 import arcade
+
+import score
 import shop
 import sound
 
@@ -34,7 +36,7 @@ class WaveManager:
                 self.current_wave = self.waves[self.current_wave_number]
                 self.gameView.window.show_view(shop.ShopView(self.gameView))
             except IndexError:
-                arcade.exit()
+                self.gameView.window.show_view(score.WinScreen(self.gameView))
 
     def draw_wave_status(self):
         if self.current_wave.count_down > 1:
@@ -160,4 +162,5 @@ class Wave:
         scene.get_sprite_list("Enemies").clear()
         scene.get_sprite_list("Bullets").clear()
         scene.get_sprite_list("Coins").clear()
+        scene.get_sprite_list("Slash").clear()
         self.completed = True

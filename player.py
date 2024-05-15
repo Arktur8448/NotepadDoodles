@@ -7,6 +7,7 @@ from pyglet.math import Vec2
 import gui
 import items
 import main
+import score
 
 DELTA_TIME = 1 / 60
 
@@ -242,7 +243,7 @@ class Player(arcade.Sprite):
 
         _update_animation()
         if self.hp <= 0:
-            window.show_view(main.MainMenuView())
+            window.show_view(score.LoseScreen(self.gameView))
 
     def show_bars(self):
         if self.stamina != self.max_stamina and not self.max_stamina == 0 and not self.stamina < 0:

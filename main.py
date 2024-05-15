@@ -6,6 +6,7 @@ import enemies
 import player as pl
 import fight
 import characters
+import score
 import sound
 import waves
 import arcade.gui
@@ -14,10 +15,6 @@ import json
 
 # pyinstaller --onefile --noconsole --icon=icon.ico main.py
 # python -m nuitka --mingw64 main.py --windows-icon-from-ico="icon.ico" --disable-console --onefile
-# TODO
-# Shop
-# win screen
-# muzyki troche więcej
 
 fullScreen = True
 
@@ -115,7 +112,6 @@ class GameView(arcade.View):
         self.scene.add_sprite_list("Player")
         self.scene.add_sprite_list("Slash")
         self.scene.add_sprite_list("Enemies")
-        self.scene.add_sprite_list("EnemiesBars")
         self.scene.add_sprite_list("Coins")
         self.scene.add_sprite_list("Bullets")
         self.scene.add_sprite("Player", self.playerObject)
@@ -279,6 +275,14 @@ class GameView(arcade.View):
             if arcade.key.L in self.playerObject.keys:
                 del self.playerObject.keys[arcade.key.L]
                 self.waveManager.current_wave.end_wave(self.scene)
+            if arcade.key.P in self.playerObject.keys:
+                del self.playerObject.keys[arcade.key.P]
+                self.waveManager.current_wave.end_wave(self.scene)
+                self.waveManager.current_wave = self.waveManager.waves[-1]
+                self.waveManager.current_wave_number = self.waveManager.waves_count
+            if arcade.key.O in self.playerObject.keys:
+                del self.playerObject.keys[arcade.key.O]
+                self.waveManager.current_wave.time = 10
             if arcade.key.J in self.playerObject.keys:
                 del self.playerObject.keys[arcade.key.J]
                 self.playerObject.max_hp = 99999
@@ -302,6 +306,14 @@ class GameView(arcade.View):
             if arcade.key.S in self.playerObject.keys:
                 del self.playerObject.keys[arcade.key.S]
                 self.waveManager.current_wave.count_down = 0
+            if arcade.key.U in self.playerObject.keys:
+                del self.playerObject.keys[arcade.key.U]
+                self.window.show_view(score.WinScreen(self))
+            if arcade.key.Y in self.playerObject.keys:
+                del self.playerObject.keys[arcade.key.Y]
+                self.window.show_view(score.LoseScreen(self))
+
+
 
         # if arcade.key.E in self.playerObject.keys:
         #     del self.playerObject.keys[arcade.key.E]

@@ -1,3 +1,5 @@
+import json
+
 import arcade
 import arcade.gui
 from typing import Tuple
@@ -204,14 +206,33 @@ class CharacterCard:
         )
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
-        play = Button(178 * self.scale, 55 * self.scale, "PLAY")
+        play = Button(178 * self.scale, 35 * self.scale, "PLAY")
         play.on_click = self.start
         self.manager.add(arcade.gui.UIAnchorWidget(
             anchor_x="left",
             anchor_y="bottom",
             align_x=self.border.right - play.width - 40,
-            align_y=self.name.y - 10,
+            align_y=self.border.top - play.height - 20,
             child=play)
+        )
+        try:
+            with open("SCORES.json", 'r') as file:
+                scores = json.load(file)
+            score = scores[f"{self.character.name}"]
+        except FileNotFoundError:
+            score = None
+        except KeyError:
+            score = None
+
+        self.score = arcade.Text(
+            f"BEST SCORE: {score}",
+            self.border.right - play.width - 40,
+            self.border.top - 80 * self.scale,
+            color=(0, 0, 0, 255),
+            font_size=12 * self.scale,
+            font_name="First Time Writing!",
+            bold=True,
+            anchor_x="left",
         )
 
     def draw(self):
@@ -219,6 +240,7 @@ class CharacterCard:
         self.name.draw()
         self.desc.draw()
         self.manager.draw()
+        self.score.draw()
 
     def start(self, event=None):
         sound.play_sound("sounds/wave_start.mp3")
